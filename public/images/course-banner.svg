@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="520" viewBox="0 0 1600 520" fill="none">
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="1600" y2="520" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#293B78"/>
+      <stop offset="1" stop-color="#6476C7"/>
+    </linearGradient>
+    <linearGradient id="card" x1="1060" y1="90" x2="1360" y2="400" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fff"/>
+      <stop offset="1" stop-color="#EEF1FF"/>
+    </linearGradient>
+  </defs>
+  <path fill="url(#background)" d="M0 0h1600v520H0z"/>
+  <circle cx="1480" cy="65" r="220" fill="#fff" fill-opacity=".08"/>
+  <circle cx="1040" cy="500" r="270" fill="#fff" fill-opacity=".06"/>
+  <path d="M0 425c210-120 420-120 630 0s420 120 630 0 240-110 340-70v165H0V425Z" fill="#fff" fill-opacity=".07"/>
+  <text x="112" y="188" fill="#DDE4FF" font-family="Arial,sans-serif" font-size="24" font-weight="700" letter-spacing="5">СУРГАЛТЫН СИСТЕМ</text>
+  <text x="108" y="270" fill="#fff" font-family="Arial,sans-serif" font-size="58" font-weight="700">Course Management</text>
+  <text x="112" y="322" fill="#E4E8FF" font-family="Arial,sans-serif" font-size="25">Хичээлээ хайж, сонгож, мэдээлэлтэй нь танилцаарай.</text>
+  <rect x="1060" y="90" width="330" height="310" rx="28" fill="url(#card)"/>
+  <rect x="1100" y="130" width="250" height="130" rx="16" fill="#E3E8FF"/>
+  <path d="m1173 220 49-58 38 40 27-29 44 47h-158Z" fill="#8293E0"/>
+  <circle cx="1150" cy="169" r="13" fill="#F2B96E"/>
+  <rect x="1100" y="286" width="172" height="15" rx="7.5" fill="#344987"/>
+  <rect x="1100" y="318" width="220" height="10" rx="5" fill="#C5CBE0"/>
+  <rect x="1100" y="342" width="185" height="10" rx="5" fill="#D7DBE9"/>
+</svg>
