@@ -7,7 +7,7 @@ import CourseBanner from "../../components/CourseBanner";
 type Course = { id: string | number; name?: string; title?: string };
 
 async function CourseList() {
-  const apiUrl = process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000";
+  const apiUrl = process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3002";
   const token = (await cookies()).get("surgaal-token")?.value;
   const response = await fetch(`${apiUrl}/api/courses`, {
     cache: "no-store",

@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
   }
   const authorization = request.headers.get("authorization");
   if (!authorization) return Response.json({ message: "Authentication required" }, { status: 401 });
-  const base = process.env.API_URL || "http://localhost:3000";
+  const base = process.env.API_URL || "http://localhost:3002";
   const response = await fetch(`${base}/${resource}`, {
     headers: { Authorization: authorization },
     ...(mode === "no-store" ? { cache: "no-store" as const } : { next: { revalidate: 60 } }),

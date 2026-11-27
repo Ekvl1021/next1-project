@@ -1,0 +1,9 @@
+node_modules
+.env*
+.git
+*.log
+.next
+.next*
+dist
+reports
+exports

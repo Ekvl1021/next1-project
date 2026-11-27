@@ -122,10 +122,12 @@ my-app/
 ├── shared/            # Хоёр талын ашигладаг хичээлийн парын цаг
 ├── backend-legacy/    # Өмнөх JSON backend, архив
 ├── docker/            # Compose MongoDB init
-├── docker-compose.yml
+├── compose.yaml
 └── README.md
 ```
 
 Git repository-ийн үндэс `my-app/` хэвээр; frontend болон backend тус бүр өөрийн package.json, node_modules, environment файлтай. Vercel дээр **Root Directory: frontend**, Framework: Next.js, Build: `npm run build`. `frontend/lib/class-periods.ts` нь root-ийн `shared/` ашигладаг тул Vercel-ийн Root Directory тохиргооны **Include source files outside of the Root Directory in the Build Step** сонголтыг идэвхжүүлнэ. API_URL/NEXT_PUBLIC_API_URL нь онлайн HTTPS backend хаяг байна; localhost-ийг нийтэд deploy хийх API хаяг болгож ашиглахгүй.
 
 Docker build болон Compose-ийг repository-ийн үндэс `my-app/` дотроос ажиллуулна. Заавар: [backend README](backend/README.md#docker-оор-api-ажиллуулах). Frontend тусдаа локал 3001, backend локал 3002, ганц Docker backend 5000, Compose backend 5001 порттой.
+
+Production deployment бэлтгэл, CORS origin болон HTTPS API гаргах дараалал: [backend deployment төлөвлөгөө](backend/README.md#https-public-api-гаргах-төлөвлөгөө). Public API болон production domain одоогоор үүсгээгүй.

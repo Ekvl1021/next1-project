@@ -187,7 +187,7 @@ Docker Desktop-ийн host холболтын тайлбар: https://docs.docke
 
 ## Docker Compose — тусдаа MongoDB ба API
 
-`../docker-compose.yml` нь MongoDB 8 болон backend-ийг хамт ажиллуулна. `mongodb` service нэрээр API дотроос холбогдоно. MongoDB host порт нийтлэхгүй. Root админы credential зөвхөн MongoDB-д, хязгаарлагдсан `readWrite` credential backend-д дамжина. MongoDB-ийн authenticated healthcheck амжилттай болсны дараа backend асна.
+`../compose.yaml` нь MongoDB 8 болон backend-ийг хамт ажиллуулна. `mongodb` service нэрээр API дотроос холбогдоно. MongoDB host порт нийтлэхгүй. Root админы credential зөвхөн MongoDB-д, хязгаарлагдсан `readWrite` credential backend-д дамжина. MongoDB-ийн authenticated healthcheck амжилттай болсны дараа backend асна.
 
 `my-app` дотроос (нууц утгуудыг логт хэвлэдэг `docker compose config`-ийг `--quiet`-гүй ажиллуулахгүй):
 
@@ -210,3 +210,27 @@ docker compose down
 Эх сурвалж: [Compose startup order](https://docs.docker.com/compose/how-tos/startup-order/), [MongoDB official image](https://hub.docker.com/_/mongo/).
 
 Одоогийн компьютерийн `my-app/.env` нь Compose-д шаардлагатай JWT, database болон admin credential-ийн локал хуулбартай (Git-д орохгүй). Иймээс `my-app` дотроос `docker compose up -d --build`, `docker compose ps`, `docker compose logs` гэж шууд ажиллуулж болно. Backend/admin эх файлын нууц үгийг өөрчилбөл Compose-ийн `.env` хуулбарыг мөн шинэчилнэ; эсвэл дээрх хоёр `--env-file` сонголттой командыг ашиглана. Шинэ clone-д `.env` автоматаар ирэхгүй.
+
+### Контейнерийн startup ба хадгалалт
+
+Express `0.0.0.0` дээр listen хийнэ. Compose MongoDB-ийн authenticated healthcheck болон `service_healthy` dependency ашиглана. Backend эхлэхдээ MongoDB холболтыг анхдагчаар 5 удаа, оролдлого хооронд 2000ms хүлээж давтана (`MONGODB_CONNECT_ATTEMPTS`, `MONGODB_RETRY_DELAY_MS`). Authentication алдаа шууд зогсоно; бусад алдаа retry дуусвал процесс exit code 1 өгнө. MongoDB driver нь тогтсон холболтын дараах дахин холболтыг удирдана. Compose MongoDB порт host руу нээлтгүй, өгөгдөл named volume-д хадгалагдана. `docker compose down` volume-ийг хадгална; өгөгдөл хадгалахдаа `down -v` ашиглахгүй.
+
+### Лаборатори №9 — Docker шалгалт (2026-11-27)
+
+`backend/Dockerfile`, `backend/.dockerignore`, root context-д зориулсан `backend/Dockerfile.dockerignore`, `compose.yaml` бэлэн. Compose backend-ийн image нэр `university-api:latest`; MongoDB нь `mongo:8`. `docker compose up -d --build` командаар build/асаана.
+
+Контейнерүүдийг `docker compose down` → `docker compose up -d` хийж дахин үүсгэсний дараа 13 collection-ийн document тоо болон бүх document-ийн SHA-256 хээ өмнөхтэй ижил байсныг баталгаажуулсан. Нотолгоо: локал `reports/docker-lab9-before.json`, `reports/docker-lab9-after.json`. JWT-тай `GET /api/students?limit=100` HTTP 200, 38 оюутан; Swagger HTTP 200. `docker compose ps` дээр MongoDB healthy, backend running. Volume устгаагүй.
+
+## HTTPS public API гаргах төлөвлөгөө
+
+Одоогийн төлөв: локал API болон Docker API ажиллана; public HTTPS API хараахан үүсгээгүй. Production frontend domain хараахан тохируулаагүй. Доорх жишээ хаягуудыг бодит хаягаар сольж хэрэглэнэ.
+
+1. AWS сургалтын account/region, боломжтой үйлчилгээ болон зардлын хүрээг баталгаажуулна. AWS EC2 дээр Docker backend ажиллуулах, domain болон HTTPS reverse proxy тохируулах хувилбараар бэлтгэнэ. Docker image-ийг серверийн CPU architecture-д тааруулан build хийнэ.
+2. MongoDB Atlas дээр universityDb database, зөвхөн readWrite эрхтэй application user үүсгэнэ. Одоогийн өгөгдлийг backup авч cloud руу шилжүүлнэ. Atlas network access-д backend серверийн зөвшөөрсөн outbound IP-г нэмнэ; MongoDB-г нийтэд нууц үггүй нээхгүй. Backend-д Atlas-аас өгсөн MONGODB_URI-г тохируулна.
+3. Backend image-ийг private registry-д хадгалж сервер дээр ажиллуулна. JWT_SECRET болон MONGODB_URI-г серверийн нууц environment/secret storage-д өгнө; Dockerfile, Compose, GitHub болон frontend bundle-д нууц утгыг бичихгүй.
+4. Domain-ийн DNS-г серверт холбож reverse proxy дээр хүчинтэй TLS certificate тохируулна. Гаднаас 443 портын HTTPS хүсэлтийг backend-ийн 3002 порт руу дамжуулна. Database болон backend-ийн дотоод портыг нийтэд шууд нээхгүй.
+5. Vercel frontend-ийн бодит origin-ийг backend CORS_ORIGINS-д өгнө: жишээ `https://your-project.vercel.app`. Эхлээд локал туршилттай зэрэг ашиглах бол `http://localhost:3001,https://your-project.vercel.app` гэж таслалаар тусгаарлаж болно. Slash/path нэмэхгүй; preview domain бүрийг шаардлагатай үед тусад нь зөвшөөрнө. Тохиргоо өөрчлөгдвөл backend/container-ийг дахин үүсгэж ачаална.
+6. Vercel Root Directory: frontend. API_URL болон NEXT_PUBLIC_API_URL-д бодит public HTTPS backend base URL өгч frontend-ийг rebuild/redeploy хийнэ. Localhost болон host.docker.internal нь public backend URL биш. NEXT_PUBLIC_ утга browser-т харагддаг тул зөвхөн API хаяг өгнө.
+7. Public HTTPS Swagger, login, JWT-тай Student API, allowed/disallowed CORS origin, оюутны файл upload/download болон дахин асаахад хадгалалт хэвээр байгааг шалгана. Эдгээр шалгалт дуусахаас өмнө deployment бэлэн гэж үзэхгүй.
+
+Atlas холболтын шаардлага: https://www.mongodb.com/docs/atlas/driver-connection/ . Production CORS origin-ийг бодитоор зөвшөөрөхөд frontend-ийн яг URL хэрэгтэй; одоогийн локал CORS зөвшөөрлийг жишээ domain-аар солихгүй.

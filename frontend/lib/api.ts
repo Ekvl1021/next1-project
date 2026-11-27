@@ -1,6 +1,6 @@
 import { logoutForExpiredToken } from "./auth-session";
 
-export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? process.env.API_URL ?? "http://localhost:3000";
+export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? process.env.API_URL ?? "http://localhost:3002";
 
 export async function apiRequest<T>(path: string, init: RequestInit = {}, authenticated = true): Promise<T> {
   const token = typeof window === "undefined" ? null : localStorage.getItem("surgaal-token");

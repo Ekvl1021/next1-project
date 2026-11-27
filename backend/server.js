@@ -144,7 +144,7 @@ if (require.main === module) {
     await require("./models/Student").init();
     await require("./models/Counter").init();
     await require("./models/Counter").updateOne({ _id: "students" }, { $setOnInsert: { value: 0 } }, { upsert: true });
-    app.listen(port, () => console.log(`Lab 8 API: http://localhost:${port}; Swagger: http://localhost:${port}/api-docs/`));
+    app.listen(port, "0.0.0.0", () => console.log(`Lab 8 API: http://localhost:${port}; Swagger: http://localhost:${port}/api-docs/`));
   }).catch(async (error) => {
     console.error("Startup failed:", error.message);
     await require("mongoose").disconnect();

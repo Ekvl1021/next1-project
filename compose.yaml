@@ -25,6 +25,7 @@ services:
       start_period: 20s
 
   backend:
+    image: university-api:latest
     build:
       context: .
       dockerfile: backend/Dockerfile
