@@ -1,0 +1,14 @@
+const router = require("express").Router();
+const { authenticateToken } = require("../middlewares/auth");
+const { authorizeRoles } = require("../middlewares/authorize");
+const { validateStudent, validateStudentPatch, validateStudentId } = require("../middlewares/validateStudent");
+const controller = require("../controllers/student-controller");
+const wrap = (handler) => (req, res, next) => Promise.resolve(handler(req, res, next)).catch(next);
+router.use(authenticateToken);
+router.get("/", authorizeRoles("admin", "teacher"), wrap(controller.getAllStudents));
+router.get("/:id", authorizeRoles("admin", "teacher"), validateStudentId, wrap(controller.getStudentById));
+router.post("/", authorizeRoles("admin"), validateStudent, wrap(controller.createStudent));
+router.put("/:id", authorizeRoles("admin", "teacher"), validateStudentId, validateStudent, wrap(controller.updateStudent));
+router.patch("/:id", authorizeRoles("admin", "teacher"), validateStudentId, validateStudentPatch, wrap(controller.updateStudent));
+router.delete("/:id", authorizeRoles("admin"), validateStudentId, wrap(controller.deleteStudent));
+module.exports = router;

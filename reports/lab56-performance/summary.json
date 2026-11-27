@@ -1,0 +1,104 @@
+{
+  "/reports/baseline": {
+    "runs": 3,
+    "initialJSKB": 161.35466666666665,
+    "initialAPIRequests": 3,
+    "loadSeconds": 0.03323333333308498,
+    "openReportJSKB": 0.0,
+    "openReportAPIRequests": 0,
+    "lighthousePerformance": 85.33333333333333,
+    "fcpMs": 171.5637025024414,
+    "lcpMs": 296.7132101623535,
+    "tbtMs": 0,
+    "cls": 0.29371161678900465,
+    "loadRunsMs": [
+      38.100000001490116,
+      28.800000000745058,
+      32.79999999701977
+    ],
+    "jsRunsKB": [
+      143.86,
+      170.102,
+      170.102
+    ],
+    "lighthouseRuns": [
+      88,
+      84,
+      84
+    ],
+    "imageTransferBytes": [
+      1182,
+      1182,
+      1182
+    ],
+    "courseItemCommits": 33
+  },
+  "/reports/optimized": {
+    "runs": 3,
+    "initialJSKB": 170.828,
+    "initialAPIRequests": 0,
+    "loadSeconds": 0.03430000000074506,
+    "openReportJSKB": 1.499,
+    "openReportAPIRequests": 3,
+    "lighthousePerformance": 89,
+    "fcpMs": 171.53386916910807,
+    "lcpMs": 278.73777215372724,
+    "tbtMs": 0,
+    "cls": 0.21647911314683477,
+    "loadRunsMs": [
+      37,
+      35.19999999925494,
+      30.700000002980232
+    ],
+    "jsRunsKB": [
+      170.828,
+      170.828,
+      170.828
+    ],
+    "lighthouseRuns": [
+      89,
+      89,
+      89
+    ],
+    "imageTransferBytes": [
+      1182,
+      1182,
+      1182
+    ],
+    "reportReadyAfterClickMs": 321.5,
+    "courseItemCommits": 3
+  },
+  "/dashboard": {
+    "runs": 3,
+    "initialJSKB": 152.206,
+    "initialAPIRequests": 2,
+    "loadSeconds": 0.030266666668156784,
+    "openReportJSKB": 0.0,
+    "openReportAPIRequests": 0,
+    "lighthousePerformance": 100,
+    "fcpMs": 170.20631916910807,
+    "lcpMs": 295.6064333333333,
+    "tbtMs": 0,
+    "cls": 2.934364328867875e-05,
+    "loadRunsMs": [
+      31.900000002235174,
+      29.800000000745058,
+      29.100000001490116
+    ],
+    "jsRunsKB": [
+      152.206,
+      152.206,
+      152.206
+    ],
+    "lighthouseRuns": [
+      100,
+      100,
+      100
+    ],
+    "imageTransferBytes": [
+      0,
+      0,
+      0
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+"use client";
+import { useEffect, useState } from 'react';
+import { apiRequest } from '../lib/api';
+import type { TeacherProfile } from '../lib/types';
+import Icon from './Icon';
+export default function TeacherDirectory(){
+ const [teachers,setTeachers]=useState<TeacherProfile[]>([]),[error,setError]=useState(''),[query,setQuery]=useState('');
+ useEffect(()=>{let active=true;apiRequest<TeacherProfile[]>('/api/teachers').then(rows=>{if(active)setTeachers(rows)}).catch(e=>{if(active)setError(e.message)});return()=>{active=false}},[]);
+ return <><div className="sg-panel-toolbar portal-directory-tools"><div><h2>Манай багш нар</h2><p>Багшийн танилцуулга, заадаг хичээл, ажлын өрөө.</p></div><label className="sg-search"><Icon name="search"/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Багш эсвэл хичээлээр хайх" aria-label="Багш хайх"/></label></div>{error&&<p className="sg-error">{error}</p>}<div className="portal-teacher-grid">{teachers.filter(t=>`${t.displayName} ${t.courses.map(c=>c.title).join(' ')}`.toLowerCase().includes(query.toLowerCase())).map(t=><article className="portal-teacher-card" key={t.id}><div className="portal-teacher-cover"/><div className="portal-teacher-photo">{/* eslint-disable-next-line @next/next/no-img-element */}<img src={t.photo||'/teachers/default.svg'} alt={`${t.displayName} багшийн танилцуулгын зураг`}/></div><div className="portal-teacher-info"><span className="portal-tag">{t.position}</span><h2>{t.displayName}</h2><p>{t.department}</p><p className="portal-teacher-bio">{t.bio||'Хичээлийн мэдээлэл болон зөвлөгөөг сургалтын орчноор дамжуулан авна уу.'}</p><h3>Заадаг хичээлүүд</h3><div className="portal-course-chips">{t.courses.length?t.courses.map(c=><span key={c.id}>{c.title}</span>):<span>Хичээл хараахан оноогоогүй</span>}</div><footer><Icon name="calendar" size={16}/>{t.office||'Өрөөний мэдээлэл удахгүй нэмэгдэнэ'}</footer></div></article>)}</div><p className="portal-caption">Танилцуулгын зураг нь сургалтын жишээ дүрслэл болно.</p></>;
+}

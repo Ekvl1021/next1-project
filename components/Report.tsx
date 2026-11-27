@@ -9,11 +9,11 @@ type ReportData = { courses: number; students: number; teachers: number };
 
 async function fetchReportData(): Promise<ReportData> {
   const [courses, students, teachers] = await Promise.all([
-    apiRequest<Course[]>("/courses", {}, false),
-    apiRequest<Student[]>("/students"),
+    apiRequest<Course[]>("/api/courses"),
+    apiRequest<Student[] | { data: Student[]; pagination?: { total: number } }>("/students?limit=100"),
     apiRequest<Teacher[]>("/teachers"),
   ]);
-  return { courses: courses.length, students: students.length, teachers: teachers.length };
+  return { courses: courses.length, students: Array.isArray(students) ? students.length : students.pagination?.total ?? students.data.length, teachers: teachers.length };
 }
 
 export default function Report() {
@@ -64,7 +64,7 @@ export default function Report() {
   return (
     <section className="report-card" aria-labelledby="course-statistics-heading">
       <div className="report-card-heading">
-        <h2 id="course-statistics-heading">Course Statistics</h2>
+        <h2 id="course-statistics-heading">Бүртгэлийн тойм</h2>
         <button type="button" onClick={() => void refreshReport()}>Шинэчлэх</button>
       </div>
       <dl className="report-statistics">

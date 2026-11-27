@@ -6,7 +6,7 @@ import CourseSearch, { type SearchableCourse } from "../../components/CourseSear
 import CourseBanner from "../../components/CourseBanner";
 
 async function fetchCourses() {
-  return apiRequest<SearchableCourse[] | { courses: SearchableCourse[] }>("/courses", {}, false);
+  return apiRequest<SearchableCourse[] | { courses: SearchableCourse[] }>("/api/courses");
 }
 
 export default function CoursesClientPage() {
@@ -64,7 +64,7 @@ export default function CoursesClientPage() {
     ) : (
       <div className="client-course-results">
         <div className="client-course-card-heading">
-          <span>НИЙТЭД НЭЭЛТТЭЙ</span>
+          <span>ХИЧЭЭЛИЙН ЖАГСААЛТ</span>
           <div className="client-course-heading-actions">
             <strong>{courses.length} хичээл</strong>
             <button className="course-refresh-button" type="button" onClick={() => void loadCourses()} disabled={loading}>

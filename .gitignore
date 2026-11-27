@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Isolated production performance build
+/.next-lab-performance/
+
+# Isolated portal verification build
+/.next-portal-check/

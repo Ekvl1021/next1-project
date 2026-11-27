@@ -1,32 +1,22 @@
 "use client";
-
 import Link from "next/link";
 import { useUser } from "../context/UserContext";
-import UserInfo from "./UserInfo";
-import type { Course, DashboardSection } from "../lib/types";
-
-type SidebarProps = {
-  section: DashboardSection;
-  studentCount: number;
-  courses: Course[];
-  onAddStudent: () => void;
-  onSignOut: () => void;
-};
-
-export default function Sidebar({ section, studentCount, courses, onAddStudent, onSignOut }: SidebarProps) {
+import type { DashboardSection } from "../lib/types";
+import Icon from "./Icon";
+import { navigation } from "../lib/navigation";
+const roles = { admin: "Администратор", teacher: "Багш", student: "Оюутан" };
+export default function Sidebar({ section, open, onClose, onSignOut }: { section: DashboardSection; open: boolean; onClose: () => void; onSignOut: () => void }) {
   const { session } = useUser();
   if (!session) return null;
-
-  const canManage = session.role !== "student";
-  return <aside className="sidebar">
-    <Link className="brand" href="/dashboard"><span className="brand-mark">s</span><span>surgaal<span className="brand-dot">.</span><small>СУРГАЛТЫН СИСТЕМ</small></span></Link>
-    <div className="side-label">ҮНДСЭН ЦЭС</div>
-    <nav className="nav-list">
-      <Link href="/dashboard" className={`nav-link ${section === "overview" ? "active" : ""}`}><span className="nav-icon">▦</span>Хяналтын самбар</Link>
-      {canManage && <Link href="/students" className={`nav-link ${section === "students" ? "active" : ""}`}><span className="nav-icon">♙</span>Оюутнууд<span className="nav-count">{studentCount}</span></Link>}
-      {canManage && <Link href="/courses" className={`nav-link ${section === "courses" ? "active" : ""}`}><span className="nav-icon">▤</span>Хичээлүүд<span className="nav-count">{courses.length}</span></Link>}
-      {canManage && <Link href="/reports" className="nav-link"><span className="nav-icon">▥</span>Тайлан</Link>}
-    </nav>
-    <div className="sidebar-bottom"><div className="help-card"><span className="help-spark">✦</span><strong>Сургалтын систем</strong><p>Оюутан, багш, хичээлийн мэдээллээ удирдаарай.</p>{session.role === "admin" && <button onClick={onAddStudent}>＋ Бүртгэл нэмэх</button>}</div><div className="profile"><UserInfo variant="profile" /><button className="profile-logout" onClick={onSignOut}>Гарах</button></div></div>
-  </aside>;
+  const links = navigation(session.role);
+  return <>
+    {open && <button className="sg-nav-backdrop" onClick={onClose} aria-label="Цэс хаах" />}
+    <aside id="app-sidebar" className={`sg-sidebar ${open ? "is-open" : ""}`}>
+      <Link href="/dashboard" className="sg-brand" onClick={onClose}><span className="sg-brand-icon"><Icon name="cap" size={26} /></span><span>EDURA<span className="sg-brand-period">.</span><small>СУРГАЛТЫН ОРЧИН</small></span></Link>
+      <div className="sg-side-label">МИНИЙ ОРЧИН</div>
+      <nav aria-label="Үндсэн цэс">{links.map(link => <Link key={link.key} href={link.href} onClick={onClose} aria-current={section === link.key ? "page" : undefined} className={section === link.key ? "is-active" : ""}><Icon name={link.icon} /><span>{link.text}</span>{section === link.key && <i />}</Link>)}</nav>
+      <div className="sg-side-note"><span className="sg-note-symbol"><Icon name="cap" /></span><strong>2026–2027 · Намрын улирал</strong><p>{session.role === 'student' ? 'Сонголтоо илгээж, баталгаажсан хуваариа хараарай.' : session.role === 'teacher' ? 'Таны хичээл, оюутан, үнэлгээ нэг дор.' : 'Сургалтын үйл ажиллагааны удирдлага.'}</p><Link href="/dashboard" onClick={onClose}>Сургалтын орчин</Link></div>
+      <div className="sg-side-user"><span className="sg-avatar">{session.name.charAt(0).toUpperCase()}</span><div><strong>{session.name}</strong><small>{roles[session.role]}</small></div><button onClick={onSignOut} aria-label="Системээс гарах" title="Гарах"><Icon name="logout" size={18} /><span>Гарах</span></button></div>
+    </aside>
+  </>;
 }

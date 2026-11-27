@@ -14,7 +14,7 @@ const navigation = [
 
 export default function Header() {
   const pathname = usePathname();
-  const routesWithExistingNavigation = ["/login", "/dashboard", "/courses", "/students"];
+  const routesWithExistingNavigation = ["/", "/login", "/dashboard", "/courses", "/students", "/planner", "/reports", "/attendance", "/course-selection", "/schedule", "/grades", "/teachers"];
 
   if (routesWithExistingNavigation.includes(pathname)) return null;
 

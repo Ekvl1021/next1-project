@@ -1,0 +1,11 @@
+"use client";
+import { useState } from 'react';
+import Link from 'next/link';
+import type { Course } from '../lib/types';
+import Icon from './Icon';
+const descriptions=['Суралцах сууриа тавих жил. Программчлал, математик, англи хэлний хичээлүүдээс эхлээрэй.','Мэргэжлийн сууриа гүнзгийрүүлнэ. Алгоритм, өгөгдлийн сан, системийн хичээлүүдийг дараалуулан судлаарай.','Мэргэжлийн ур чадвараа хөгжүүлнэ. Веб, мобайл, сүлжээ болон багийн төсөл дээр ажиллана.','Мэргэшил, дадлага, төгсөлтийн төсөлдөө төвлөрнө. Өөрийн чиглэлийн сонгон хичээлээ сонгоорой.'];
+export default function Curriculum({courses}:{courses:Course[]}) {
+ const [year,setYear]=useState(1);
+ const rows=courses.filter(c=>(c.year||1)===year);
+ return <div><section className="portal-callout"><Icon name="cap" size={36}/><div><h2>Таны дөрвөн жилийн суралцах зам</h2><p>Программ хангамжийн хөтөлбөр · 8 улирал. Доорх нь санал болгох дараалал; хичээл сонголт бүрийг администратор батална.</p></div></section><div className="portal-year-tabs" role="tablist" aria-label="Курс">{[1,2,3,4].map(y=><button role="tab" aria-selected={year===y} className={year===y?'active':''} key={y} onClick={()=>setYear(y)}>{y}-р курс<small>{courses.filter(c=>(c.year||1)===y).length} хичээл</small></button>)}</div><section className="sg-panel"><div className="sg-panel-toolbar"><div><h2>{year}-р курст эдгээр хичээлийг судалж болно</h2><p>{descriptions[year-1]}</p></div><span className="sg-count">{rows.reduce((n,c)=>n+(c.credits||3),0)} кредит</span></div>{[year*2-1,year*2].map(semester=><div className="portal-curriculum" key={semester}><h3>{semester}-р улирал <span>{semester%2?'Намар':'Хавар'}</span></h3><div className="portal-curriculum-grid">{rows.filter(c=>(c.semester||1)===semester).map(c=><article key={c.id}><div><code>{c.code||`CS${c.id.slice(-3)}`}</code><span>{c.credits||3} кредит</span></div><h4>{c.title}</h4><p>{c.category||'Мэргэжлийн суурь'}</p></article>)}</div></div>)}</section><div className="portal-callout subtle"><Icon name="check"/><div><h3>Санал болгох төлөвлөгөөнөөс сонголт руу</h3><p>Энэ жагсаалт хичээлд бүртгэхгүй. Хичээл сонголт хэсгээс хүсэлтээ илгээнэ үү.</p></div><Link href="/course-selection" className="sg-button sg-primary">Хичээл сонгох</Link></div></div>;
+}

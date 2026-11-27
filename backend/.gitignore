@@ -1,2 +1,5 @@
 .env
 node_modules/
+
+# Per-user planner records
+data/planners.json

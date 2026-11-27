@@ -1,234 +1,176 @@
 "use client";
-
-import Link from "next/link";
+import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { getTokenExpirationMs, logoutForExpiredToken } from "../lib/auth-session";
+import dynamic from "next/dynamic";
 import { useUser } from "../context/UserContext";
 import { apiRequest } from "../lib/api";
-import type { Course, DashboardSection as Section, Student } from "../lib/types";
-import DashboardHeader from "./DashboardHeader";
+import { normalizeStudents } from "../lib/student-data";
+import type { Course, DashboardSection, Student, TeacherProfile } from "../lib/types";
 import Sidebar from "./Sidebar";
-import SearchBox from "./SearchBox";
+import { navigation } from "../lib/navigation";
+import AcademicHome from "./AcademicHome";
+import Curriculum from "./Curriculum";
+import TeacherDirectory from "./TeacherDirectory";
+import ScheduleBoard from "./ScheduleBoard";
+import Gradebook from "./Gradebook";
+import AssessmentManager from "./AssessmentManager";
 import CourseList from "./CourseList";
-
-const initialStudents: Student[] = [
-  { id: "s-1", name: "Анужин Бат", email: "anujin@example.mn", program: "Программ хангамж", courseId: "c-1" },
-  { id: "s-2", name: "Тэмүүлэн Ган", email: "temuulen@example.mn", program: "Мэдээллийн систем", courseId: "c-2" },
-  { id: "s-3", name: "Номин Эрдэнэ", email: "nomin@example.mn", program: "Программ хангамж", courseId: "c-1" },
-  { id: "s-4", name: "Билгүүн Дорж", email: "bilguun@example.mn", program: "Дизайн", courseId: "c-3" },
-];
-export default function Dashboard({ section = "overview" }: { section?: Section }) {
+import Icon from "./Icon";
+import Modal from "./Modal";
+import EmptyState from "./EmptyState";
+const Report = dynamic(() => import("./Report"), { loading: () => <p role="status">Тайлан ачаалж байна…</p> });
+const Attendance = dynamic(() => import("./AttendanceManager"), { loading: () => <p role="status">Ирц ачаалж байна…</p> });
+const CourseSelection = dynamic(() => import("./CourseSelectionManager"), { loading: () => <p className="sg-loading" role="status">Хичээл сонголт ачаалж байна…</p> });
+type Dialog = { type: "course"; course?: Course } | { type: "student" } | { type: "detail"; course: Course } | { type: "delete"; kind: "course" | "student"; id: string; title: string } | null;
+const info = {
+  assignments: { title: "Даалгавар", description: "Хичээлийн даалгавар, материал болон илгээсэн хариу." },
+  exams: { title: "Шалгалт", description: "Шалгалтын заавар, хугацаа болон хариу илгээх хэсэг." },
+  overview: { title: "Нүүр хуудас", description: "Таны сургалтын мэдээлэл, хүсэлт, суралцах ахиц." },
+  teachers: { title: "Багш нарын мэдээлэл", description: "Багшийн танилцуулга болон заадаг хичээлүүд." },
+  courses: { title: "Хичээлүүд", description: "Хичээл, багш, хуваарийн мэдээллээ нэг дороос." },
+  students: { title: "Оюутнууд", description: "Оюутны бүртгэл болон сонгосон хичээлүүд." },
+  planner: { title: "Санал болгох төлөвлөгөө", description: "Курс, улирал бүрт судлах хичээлүүдийн дараалал." },
+  selection: { title: "Хичээл сонголт", description: "Хичээл сонгоод администраторын зөвшөөрөл аваарай." },
+  schedule: { title: "Миний хуваарь", description: "Админаар баталгаажсан хичээлүүдийн долоо хоногийн хуваарь." },
+  grades: { title: "Дүн", description: "Өмнө үзсэн хичээлийн дүн болон голчоо тооцоолоорой." },
+  reports: { title: "Сургалтын тайлан", description: "Бүртгэлтэй хичээл, оюутан, багшийн ерөнхий мэдээлэл." },
+  attendance: { title: "Ирц бүртгэх", description: "Өөрийн хичээлийн баталгаажсан оюутнуудын ирцийг өдрөөр бүртгэнэ." },
+};
+export default function Dashboard({ section: requested = "courses" }: { section?: DashboardSection }) {
+  const section = requested;
   const router = useRouter();
-  const { session, ready: authChecked, setUser } = useUser();
-  const [students, setStudents] = useState<Student[]>([]);
+  const { session, ready, signOut } = useUser();
   const [courses, setCourses] = useState<Course[]>([]);
-  const [ready, setReady] = useState(false);
-  const [modal, setModal] = useState<Section | "edit-course" | null>(null);
-  const [editingCourse, setEditingCourse] = useState<Course | null>(null);
-  const [query, setQuery] = useState("");
-  const [apiError, setApiError] = useState("");
-
-  useEffect(() => {
-    if (!authChecked) return;
-    if (!session) router.replace(`/login?next=${encodeURIComponent(window.location.pathname)}`);
-    else if (session.role === "student" && section !== "overview") router.replace("/");
-  }, [authChecked, router, section, session]);
-
-  useEffect(() => {
-    const checkExpiration = () => {
-      const token = localStorage.getItem("surgaal-token");
-      const expiresAt = token ? getTokenExpirationMs(token) : null;
-      if (!expiresAt || Date.now() >= expiresAt) logoutForExpiredToken();
-    };
-
-    checkExpiration();
-    const interval = window.setInterval(checkExpiration, 1000);
-    document.addEventListener("visibilitychange", checkExpiration);
-    window.addEventListener("focus", checkExpiration);
-    window.addEventListener("pageshow", checkExpiration);
-    return () => {
-      window.clearInterval(interval);
-      document.removeEventListener("visibilitychange", checkExpiration);
-      window.removeEventListener("focus", checkExpiration);
-      window.removeEventListener("pageshow", checkExpiration);
-    };
-  }, [session]);
-
-  useEffect(() => {
-    Promise.all([apiRequest<Student[]>("/students"), apiRequest<Course[]>("/courses")])
-      .then(([studentRows, courseRows]) => { setStudents(studentRows); setCourses(courseRows); })
-      .catch((error: unknown) => setApiError(error instanceof Error ? error.message : "Мэдээлэл татахад алдаа гарлаа."))
-      .finally(() => setReady(true));
-  }, []);
-
-  const filteredStudents = useMemo(() => students.filter((student) => `${student.name} ${student.email} ${student.program}`.toLowerCase().includes(query.toLowerCase())), [students, query]);
-  const filteredCourses = useMemo(() => courses.filter((course) => `${course.title} ${course.teacher}`.toLowerCase().includes(query.toLowerCase())), [courses, query]);
-  const enrollmentCount = useCallback((courseId: string) => students.filter((student) => student.courseId === courseId).length, [students]);
-  const editCourse = useCallback((course: Course) => {
-    setEditingCourse(course);
-    setModal("edit-course");
-  }, []);
-  const title = section === "students" ? "Оюутнууд" : section === "courses" ? "Хичээлүүд" : "Хяналтын самбар";
-
-  async function addStudent(formData: FormData) {
-    try {
-      const student = await apiRequest<Student>("/students", { method: "POST", body: JSON.stringify({ name: String(formData.get("name")).trim(), email: String(formData.get("email")).trim(), program: String(formData.get("program")).trim(), courseId: String(formData.get("courseId") || "") }) });
-      setStudents((current) => [student, ...current]); setModal(null); setApiError("");
-    } catch (error) { setApiError(error instanceof Error ? error.message : "Оюутан бүртгэж чадсангүй."); }
-  }
-  async function addCourse(formData: FormData) {
-    try {
-      const fields = { title: String(formData.get("title")).trim(), teacher: String(formData.get("teacher")).trim(), schedule: String(formData.get("schedule")).trim(), room: String(formData.get("room")).trim() };
-      const editing = modal === "edit-course" && editingCourse;
-      const course = await apiRequest<Course>(editing ? `/courses/${editing.id}` : "/courses", { method: editing ? "PUT" : "POST", body: JSON.stringify(fields) });
-      setCourses((current) => editing ? current.map((item) => item.id === course.id ? course : item) : [course, ...current]); setModal(null); setEditingCourse(null); setApiError("");
-    } catch (error) { setApiError(error instanceof Error ? error.message : "Хичээл нэмж чадсангүй."); }
-  }
-  async function removeStudent(id: string) {
-    try { await apiRequest(`/students/${id}`, { method: "DELETE" }); setStudents((current) => current.filter((student) => student.id !== id)); setApiError(""); }
-    catch (error) { setApiError(error instanceof Error ? error.message : "Бүртгэл устгаж чадсангүй."); }
-  }
-  const removeCourse = useCallback(async (id: string) => {
-    try {
-      await apiRequest(`/courses/${id}`, { method: "DELETE" });
-      setCourses((current) => current.filter((course) => course.id !== id));
-      setStudents((current) => current.map((student) => student.courseId === id ? { ...student, courseId: "" } : student)); setApiError("");
-    } catch (error) { setApiError(error instanceof Error ? error.message : "Хичээл устгаж чадсангүй."); }
-  }, []);
-
-  function signOut() {
-    setUser(null);
-    router.replace("/login");
-  }
-
-  if (!authChecked || !session) return <div className="auth-loading">Surgaal <span>Уншиж байна…</span></div>;
-  if (!ready) return <div className="auth-loading">Surgaal <span>Өгөгдөл ачаалж байна…</span></div>;
-  if (section === "overview") return <ClassroomHome courses={courses} onSignOut={signOut} />;
-  const isAdmin = session.role === "admin";
-  const canManageCourses = session.role !== "student";
-
-  return (
-    <div className="app-shell">
-      <Sidebar section={section} studentCount={students.length} courses={courses} onAddStudent={() => setModal("students")} onSignOut={signOut} />
-
-      <main className="main-area">
-        <DashboardHeader title={title} />
-        <div className="page-content">
-          <div className="page-heading"><div><div className="eyebrow">САЙН БАЙНА УУ, {session.name.toLocaleUpperCase("mn-MN")} 👋</div><h1>{title}</h1><p>{section === "students" ? "Оюутнуудын бүртгэл, хичээлийн сонголтыг удирдах." : "Хичээл болон багш нарын мэдээллийг удирдах."}</p></div>{(isAdmin || session.role === "teacher") && <button className="primary-button" onClick={() => setModal(section)}>＋ {section === "students" ? "Оюутан бүртгэх" : "Хичээл нэмэх"}</button>}</div>
-          {apiError && <p className="login-error" role="alert">{apiError}</p>}
-
-          {section === "students" && canManageCourses && <section className="panel list-panel"><div className="panel-heading list-heading"><div><h2>Оюутны бүртгэл</h2><p>Нийт {students.length} оюутан бүртгэлтэй байна</p></div><SearchBox value={query} onChange={setQuery} placeholder="Нэр, имэйлээр хайх" /></div><StudentTable students={filteredStudents} courses={courses} removeStudent={isAdmin ? removeStudent : undefined} /></section>}
-
-          {section === "courses" && canManageCourses && <section className="panel list-panel"><div className="panel-heading list-heading"><div><h2>Хичээлийн жагсаалт</h2><p>Нийт {courses.length} хичээл · {new Set(courses.map((course) => course.teacher)).size} багш</p></div><SearchBox value={query} onChange={setQuery} placeholder="Хичээл, багшаар хайх" /></div><CourseList courses={filteredCourses} enrollmentCount={enrollmentCount} canEdit={canManageCourses} canDelete={isAdmin} onOpen={setEditingCourse} onEdit={editCourse} onDelete={removeCourse} /></section>}
-          <footer className="footer">© 2026 Surgaal <span>Сургалтын үйл ажиллагааг илүү хялбар.</span></footer>
-        </div>
-      </main>
-
-      {editingCourse && !modal && <div className="modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setEditingCourse(null); }}><section className="modal-card"><button type="button" className="modal-close" onClick={() => setEditingCourse(null)}>×</button><div className="eyebrow">ХИЧЭЭЛИЙН МЭДЭЭЛЭЛ</div><h2>{editingCourse.title}</h2><p>Багш: {editingCourse.teacher}</p><p>Хуваарь: {editingCourse.schedule}</p><p>Өрөө: {editingCourse.room}</p><div className="modal-actions"><button type="button" className="secondary-button" onClick={() => setEditingCourse(null)}>Хаах</button></div></section></div>}
-      {modal && <div className="modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) { setModal(null); setEditingCourse(null); } }}><form className="modal-card" action={modal === "students" ? addStudent : addCourse}><button type="button" className="modal-close" onClick={() => { setModal(null); setEditingCourse(null); }}>×</button><div className="eyebrow">{modal === "edit-course" ? "ХИЧЭЭЛ ЗАСАХ" : "ШИНЭ БҮРТГЭЛ"}</div><h2>{modal === "students" ? "Оюутан бүртгэх" : modal === "edit-course" ? "Хичээл засах" : "Хичээл нэмэх"}</h2><p>{modal === "students" ? "Оюутны үндсэн мэдээллийг оруулна уу." : "Хичээл болон заах багшийн мэдээллийг оруулна уу."}</p>{modal === "students" ? <><label>Овог, нэр<input name="name" required placeholder="Жишээ: Бат Болд" /></label><label>Имэйл хаяг<input name="email" type="email" required placeholder="student@example.mn" /></label><label>Хөтөлбөр<input name="program" required placeholder="Жишээ: Программ хангамж" /></label><label>Сонгосон хичээл<select name="courseId" defaultValue=""><option value="">Хичээл сонгох (заавал биш)</option>{courses.map((course) => <option key={course.id} value={course.id}>{course.title}</option>)}</select></label></> : <><label>Хичээлийн нэр<input name="title" required defaultValue={editingCourse?.title ?? ""} placeholder="Жишээ: Веб хөгжүүлэлт" /></label><label>Багшийн нэр<input name="teacher" required defaultValue={editingCourse?.teacher ?? ""} placeholder="Жишээ: Б. Мөнхбаяр" /></label><label>Хуваарь<input name="schedule" required defaultValue={editingCourse?.schedule ?? ""} placeholder="Жишээ: Даваа, Лхагва · 10:00" /></label><label>Өрөө<input name="room" required defaultValue={editingCourse?.room ?? ""} placeholder="Жишээ: А-204" /></label></>}<div className="modal-actions"><button type="button" className="secondary-button" onClick={() => { setModal(null); setEditingCourse(null); }}>Болих</button><button type="submit" className="primary-button">{modal === "students" ? "Бүртгэх" : modal === "edit-course" ? "Өөрчлөлт хадгалах" : "Хичээл хадгалах"}</button></div></form></div>}
-    </div>
-  );
-}
-
-function StudentTable({ students, courses, removeStudent }: { students: Student[]; courses: Course[]; removeStudent?: (id: string) => void }) {
-  if (students.length === 0) return <Empty text="Оюутан олдсонгүй." />;
-  return <div className="table-wrap"><table><thead><tr><th>ОЮУТАН</th><th>ХӨТӨЛБӨР</th><th>СОНГОСОН ХИЧЭЭЛ</th><th>ТӨЛӨВ</th><th /></tr></thead><tbody>{students.map((student, i) => <tr key={student.id}><td><div className="person-cell"><div className={`avatar student-avatar avatar-${i % 4}`}>{student.name.trim().charAt(0)}</div><div><strong>{student.name}</strong><span>{student.email}</span></div></div></td><td>{student.program}</td><td>{courses.find((course) => course.id === student.courseId)?.title ?? <span className="muted">Сонгоогүй</span>}</td><td><span className="status-pill"><i /> Идэвхтэй</span></td><td>{removeStudent && <button className="delete-button" onClick={() => removeStudent(student.id)} aria-label={`${student.name} бүртгэлийг устгах`} title="Устгах">⌫</button>}</td></tr>)}</tbody></table></div>;
-}
-function Empty({ text }: { text: string }) { return <div className="empty-state"><span>◌</span>{text}</div>; }
-
-type AcademicProgram = { id: string; name: string; faculty: string; degree: string; color: string };
-const initialPrograms: AcademicProgram[] = [
-  { id: "pr-1", name: "Программ хангамж", faculty: "Мэдээллийн технологийн сургууль", degree: "Бакалавр · 4 жил", color: "cream" },
-  { id: "pr-2", name: "Мэдээллийн систем", faculty: "Мэдээллийн технологийн сургууль", degree: "Бакалавр · 4 жил", color: "sea" },
-  { id: "pr-3", name: "UI/UX дизайн", faculty: "Дизайн, урлагийн сургууль", degree: "Бакалавр · 4 жил", color: "cream" },
-];
-const weekdays = ["Даваа", "Мягмар", "Лхагва", "Пүрэв", "Баасан"];
-const timetable = [
-  [{ time: "09:00", title: "Веб хөгжүүлэлт", teacher: "Б. Мөнхбаяр", color: "lavender" }, { time: "11:00", title: "Өгөгдлийн сан", teacher: "Д. Саруул", color: "peach" }],
-  [{ time: "10:00", title: "UI/UX дизайн", teacher: "О. Энхжин", color: "mint" }, { time: "14:00", title: "Алгоритм ба өгөгдлийн бүтэц", teacher: "Б. Мөнхбаяр", color: "blue" }],
-  [{ time: "09:00", title: "Өгөгдлийн сан", teacher: "Д. Саруул", color: "peach" }, { time: "13:00", title: "Веб хөгжүүлэлт", teacher: "Б. Мөнхбаяр", color: "lavender" }],
-  [{ time: "10:00", title: "Системийн шинжилгээ", teacher: "Д. Саруул", color: "blue" }, { time: "14:00", title: "UI/UX дизайн", teacher: "О. Энхжин", color: "mint" }],
-  [{ time: "09:00", title: "Алгоритм ба өгөгдлийн бүтэц", teacher: "Б. Мөнхбаяр", color: "lavender" }, { time: "11:00", title: "Системийн шинжилгээ", teacher: "Д. Саруул", color: "blue" }],
-];
-
-function ClassroomHome({ courses, onSignOut }: { courses: Course[]; onSignOut: () => void }) {
-  const session = useUser().session!;
-  const [programs, setPrograms] = useState<AcademicProgram[]>(initialPrograms);
-  const [activeTab, setActiveTab] = useState<"home" | "library" | "schedule" | "grades" | "survey">("home");
-  const [isDark, setIsDark] = useState(false);
+  const [teacherProfiles, setTeacherProfiles] = useState<TeacherProfile[]>([]);
+  const [students, setStudents] = useState<Student[]>([]);
+  const [mongoStudents, setMongoStudents] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
-  const [year] = useState("2026–2027");
-  const [modal, setModal] = useState<"add" | "enroll" | null>(null);
-  const [enrolledIds, setEnrolledIds] = useState<string[]>([]);
-  const [ready, setReady] = useState(false);
-
-  useEffect(() => {
+  const [query, setQuery] = useState("");
+  const [teacher, setTeacher] = useState("");
+  const [dialog, setDialog] = useState<Dialog>(null);
+  const [formError, setFormError] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [navOpen, setNavOpen] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
+  const canManage = session?.role === "admin" || session?.role === "teacher";
+  const isAdmin = session?.role === "admin";
+  const load = useCallback(async () => {
+    setRefreshing(true); setError("");
     try {
-      const savedPrograms = localStorage.getItem("surgaal-university-programs");
-      if (savedPrograms) {
-        // Browser storage is read once to hydrate this client-only demo preference.
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setPrograms(JSON.parse(savedPrograms) as AcademicProgram[]);
+      const courseRows = await apiRequest<Course[]>("/courses");
+      const studentResult = canManage
+        ? await apiRequest<Student[] | { data: Student[] }>(session?.role === "teacher" ? "/api/academic/students" : "/students?limit=100")
+        : [];
+      const studentRows = Array.isArray(studentResult) ? studentResult : studentResult.data;
+      setCourses(courseRows);
+      setStudents(normalizeStudents(studentRows));
+      setMongoStudents(!Array.isArray(studentResult));
+      setLoaded(true);
+    } catch (cause) { setError(cause instanceof Error ? cause.message : "Өгөгдөл татаж чадсангүй."); }
+    finally { setRefreshing(false); }
+  }, [canManage, session?.role]);
+  useEffect(() => {
+    if (!session) return;
+    let active = true;
+    apiRequest<TeacherProfile[]>('/api/teachers').then(rows => { if (active) setTeacherProfiles(rows); }).catch(() => {});
+    return () => { active = false; };
+  }, [session]);
+  useEffect(() => { if (ready && !session) router.replace("/login"); }, [ready, session, router]);
+  useEffect(() => {
+    if (!ready || !session) return;
+    let active = true;
+    Promise.all([
+      apiRequest<Course[]>("/courses"),
+      canManage ? apiRequest<Student[] | { data: Student[] }>(session?.role === "teacher" ? "/api/academic/students" : "/students?limit=100") : Promise.resolve([]),
+    ])
+      .then(([courseRows, studentResult]) => {
+        if (active) {
+          setCourses(courseRows);
+          setStudents(normalizeStudents(Array.isArray(studentResult) ? studentResult : studentResult.data));
+          setMongoStudents(!Array.isArray(studentResult));
+          setLoaded(true);
+          setError("");
+        }
+      })
+      .catch(cause => { if (active) setError(cause instanceof Error ? cause.message : "Өгөгдөл татаж чадсангүй."); });
+    return () => { active = false; };
+  }, [ready, session, canManage]);
+  useEffect(() => { if (!notice) return; const timer = setTimeout(() => setNotice(""), 4500); return () => clearTimeout(timer); }, [notice]);
+  const keyword = query.trim().toLocaleLowerCase("mn");
+  const filteredCourses = useMemo(() => courses.filter(course => `${course.title} ${course.teacher} ${course.room}`.toLocaleLowerCase("mn").includes(keyword) && (!teacher || course.teacher === teacher)), [courses, keyword, teacher]);
+  const studentName = (student: Student) => `${student.lastName} ${student.firstName}`.trim();
+  const filteredStudents = useMemo(() => students.filter(student => `${student.lastName} ${student.firstName} ${student.code} ${student.email} ${student.program}`.toLocaleLowerCase("mn").includes(keyword)), [students, keyword]);
+  const teachers = useMemo(() => [...new Set(courses.map(course => course.teacher))].sort(), [courses]);
+  const enrollmentCount = useCallback((id: string) => students.filter(student => student.selectedCourses?.some(course => course.id === id && course.status === "approved")).length, [students]);
+  const openCourse = useCallback((course: Course) => { setFormError(""); setDialog({ type: "detail", course }); }, []);
+  const editCourse = useCallback((course: Course) => { setFormError(""); setDialog({ type: "course", course }); }, []);
+  const deleteCourse = useCallback((id: string) => { const course = courses.find(item => item.id === id); if (course) { setFormError(""); setDialog({ type: "delete", kind: "course", id, title: course.title }); } }, [courses]);
+  function open(next: Dialog) { setFormError(""); setDialog(next); }
+  async function saveForm(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault(); if (!dialog || busy) return;
+    const form = new FormData(event.currentTarget); setBusy(true); setFormError("");
+    try {
+      if (dialog.type === "course") {
+        const body = { ...Object.fromEntries(["title", "teacher", "schedule", "room", "code"].map(key => [key, String(form.get(key) || "").trim()])), credits:Number(form.get("credits")||3), year:Number(form.get("year")||1), semester:Number(form.get("semester")||1) };
+        const course = await apiRequest<Course>(dialog.course ? `/courses/${dialog.course.id}` : "/courses", { method: dialog.course ? "PUT" : "POST", body: JSON.stringify(body) });
+        setCourses(current => dialog.course ? current.map(item => item.id === course.id ? course : item) : [...current, course]);
+        setNotice(dialog.course ? "Хичээлийн мэдээлэл шинэчлэгдлээ." : "Хичээл нэмэгдлээ.");
+      } else if (dialog.type === "student") {
+        const body = Object.fromEntries(["code", "firstName", "lastName", "email", "program"].map(key => [key, String(form.get(key) || "").trim()]));
+        const result = await apiRequest<{ data: Student }>("/students", { method: "POST", body: JSON.stringify(body) });
+        setStudents(current => [...current, result.data]); setNotice("Оюутан бүртгэгдлээ.");
+      } else if (dialog.type === "delete") {
+        await apiRequest(`/${dialog.kind === "course" ? "courses" : "students"}/${dialog.id}`, { method: "DELETE" });
+        if (dialog.kind === "course") setCourses(current => current.filter(item => item.id !== dialog.id));
+        else setStudents(current => current.filter(item => String(item.id) !== dialog.id));
+        setNotice("Бичлэг устгагдлаа.");
       }
-      const savedEnrollments = localStorage.getItem(`surgaal-enrollments-${session.email}`);
-      if (savedEnrollments) setEnrolledIds(JSON.parse(savedEnrollments) as string[]);
-      else if (session.role === "student") {
-        const student = initialStudents.find((item) => item.email === session.email || item.name === session.name);
-        if (student?.courseId) setEnrolledIds([student.courseId]);
-      } else if (session.role === "teacher") {
-        setEnrolledIds(courses.filter((course) => course.teacher === session.name).map((course) => course.id));
-      } else setEnrolledIds(courses.map((course) => course.id));
-    } catch { setPrograms(initialPrograms); }
-    setReady(true);
-  }, [courses, session.email, session.name, session.role]);
-  useEffect(() => { if (ready) localStorage.setItem("surgaal-university-programs", JSON.stringify(programs)); }, [programs, ready]);
-  useEffect(() => { if (ready) localStorage.setItem(`surgaal-enrollments-${session.email}`, JSON.stringify(enrolledIds)); }, [enrolledIds, ready, session.email]);
-
-  function addProgram(formData: FormData) {
-    const created: AcademicProgram = { id: crypto.randomUUID(), name: String(formData.get("name")).trim(), faculty: String(formData.get("faculty")).trim(), degree: String(formData.get("degree")).trim(), color: programs.length % 2 ? "sea" : "cream" };
-    setPrograms((current) => [...current, created]); setModal(null);
+      setDialog(null);
+    } catch (cause) { setFormError(cause instanceof Error ? cause.message : "Хадгалж чадсангүй."); }
+    finally { setBusy(false); }
   }
-  function enrollCourse(formData: FormData) {
-    const courseId = String(formData.get("courseId") || "");
-    if (courseId) setEnrolledIds((current) => current.includes(courseId) ? current : [...current, courseId]);
-    setModal(null);
-  }
-  const displayedCourses = courses.filter((course) => enrolledIds.includes(course.id));
-
-  const studentRecord = initialStudents.find((item) => item.email === session.email || item.name === session.name);
-  const pageTitle = activeTab === "home" ? "НҮҮР ХУУДАС" : activeTab === "library" ? "ХИЧЭЭЛ СОНГОЛТ" : activeTab === "schedule" ? "МИНИЙ ХУВААРЬ" : activeTab === "grades" ? "ДҮНГИЙН МЭДЭЭЛЭЛ" : "СУДАЛГАА";
-  const menuItems = [
-    { id: "home" as const, icon: "⌂", label: "Нүүр хуудас" },
-    { id: "library" as const, icon: "☷", label: "Хичээл сонголт" },
-    { id: "schedule" as const, icon: "▣", label: "Миний хуваарь" },
-    { id: "grades" as const, icon: "☆", label: "Дүн" },
-    { id: "survey" as const, icon: "▤", label: "Судалгаа" },
-  ];
-
-  return <main className={`ulms-shell ${isDark ? "ulms-dark" : ""}`}>
-    <aside className="ulms-sidebar">
-      <Link className="ulms-side-brand" href="/dashboard"><span className="university-seal small-seal"><b>С</b></span><span>СУРГААЛ ИХ СУРГУУЛЬ<small>ИХ СУРГУУЛИЙН LMS</small></span></Link>
-      <nav className="ulms-side-nav">{menuItems.map((item) => <button key={item.id} className={activeTab === item.id ? "active" : ""} onClick={() => setActiveTab(item.id)}><span>{item.icon}</span>{item.label}</button>)}{session.role !== "student" && <><div className="ulms-nav-caption">УДИРДЛАГА</div><Link href="/courses"><span>▤</span>Хичээл удирдах</Link>{session.role === "admin" && <Link href="/students"><span>♙</span>Оюутны бүртгэл</Link>}</>}</nav>
-      <div className="ulms-side-bottom"><div className="ulms-side-help"><span>ⓘ</span><div><strong>Тусламж, дэмжлэг</strong><small>Систем ашиглах заавар</small></div><b>⌄</b></div><button className="ulms-signout" onClick={onSignOut}><span>↪</span>Системээс гарах</button></div>
-    </aside>
-    <section className="ulms-content"><header className="ulms-topbar"><div className="ulms-page-title"><button className="ulms-menu-toggle" aria-label="Цэс">☰</button><h1>{pageTitle}</h1>{session.role === "admin" && <button className="ulms-admin-add" onClick={() => setModal("add")}>＋ Хөтөлбөр</button>}</div><div className="ulms-top-actions"><span className="ulms-flag" title="Монгол хэл">🇲🇳</span><button aria-label="Дэлгэц дүүргэх" onClick={() => document.documentElement.requestFullscreen?.()}>⛶</button><button aria-label="Өнгө солих" onClick={() => setIsDark((value) => !value)}>{isDark ? "☀" : "☾"}</button><button className="ulms-bell" aria-label="Мэдэгдэл" onClick={() => setNotice("Одоогоор шинэ мэдэгдэл алга.")}>♧<i>0</i></button><div className="ulms-user-chip"><span>{session.name.slice(0, 1)}</span><div><strong>{session.name}</strong><small>{session.role === "admin" ? "Администратор" : session.role === "teacher" ? "Багш" : "Оюутан"}</small></div></div></div></header>
-      <div className="ulms-main-content">
-        {notice && <button className="ulms-notice" onClick={() => setNotice("")}>{notice} <b>×</b></button>}
-        {activeTab === "home" && <div className="ulms-dashboard-grid">
-          <div className="ulms-left-column"><section className="ulms-panel student-info"><h2>{session.role === "student" ? "ОЮУТНЫ МЭДЭЭЛЭЛ" : session.role === "teacher" ? "БАГШИЙН МЭДЭЭЛЭЛ" : "СИСТЕМИЙН МЭДЭЭЛЭЛ"}</h2><div className="ulms-info-list"><div><span>Овог/Нэр:</span><strong>{session.name}</strong></div><div><span>Эрхийн төрөл:</span><strong>{session.role === "student" ? "Оюутан" : session.role === "teacher" ? "Багш" : "Администратор"}</strong></div><div><span>Сургууль:</span><strong>{studentRecord?.program === "Дизайн" ? "ДИЗАЙН, УРЛАГИЙН СУРГУУЛЬ" : "МЭДЭЭЛЛИЙН ТЕХНОЛОГИЙН СУРГУУЛЬ"}</strong></div><div><span>Хөтөлбөр:</span><strong>{studentRecord?.program ?? (session.role === "teacher" ? "Мэдээллийн технологи" : "Сургалтын удирдлага")}</strong></div><div><span>И-мэйл:</span><strong>{session.email}</strong></div><div><span>Семестр:</span><strong>{year} · Намар</strong></div></div><button className="ulms-support-toggle" onClick={() => setNotice("Оюутны дэмжлэгийн хүсэлт илгээх хэсэг удахгүй нээгдэнэ.")}><span>ⓘ</span> Буцалтгүй тусламж, тэтгэлэг <i /> <b>⌄</b></button></section>
-            <section className="ulms-panel useful-links"><h2>ХЭРЭГТЭЙ ХОЛБООСУУД <b>12</b></h2>{["Сургалтын төлөвлөгөө", "Оюутны гарын авлага", "Номын сангийн цахим каталог"].map((item, index) => <button key={item} onClick={() => setNotice(`${item}: холбоос хараахан тохируулаагүй байна.`)}><span>{["↗", "▤", "⌕"][index]}</span><strong>{item}</strong><small>{index === 0 ? "Хөтөлбөр, кредитийн мэдээлэл" : "Сургалтын үйлчилгээ"}</small><b>›</b></button>)}</section><section className="ulms-panel program-panel"><h2>СУРГАЛТЫН ХӨТӨЛБӨР</h2>{programs.map((program) => <div key={program.id}><span>▤</span><div><strong>{program.name}</strong><small>{program.faculty}</small></div></div>)}</section></div>
-          <div className="ulms-right-column"><section className="ulms-live-list">{(displayedCourses.length ? displayedCourses : courses).slice(0, 5).map((course, index) => <article className="ulms-live-card" key={course.id}><span className="live-pill"><i /> LIVE</span><div className="live-course-info"><strong>{course.title} — Live хичээл эхэллээ</strong><small>{["M.SW315", "M.SW306", "M.SW213", "M.SW322", "S.EL105"][index % 5]} · Лекц · {course.teacher} · {course.room} · {course.schedule.split("·").at(-1)?.trim()}</small></div><button onClick={() => setNotice(`${course.title}: хичээлийн онлайн холбоос тохируулагдаагүй байна.`)}>▣ Live-д нэгдэх</button></article>)}</section>
-            <section className="ulms-survey-card"><div className="survey-symbol">▥</div><div className="survey-copy"><span>WIFI СУДАЛГАА <small>◷ 6 хоног үлдлээ</small></span><h2>Сургуулийн WiFi сүлжээг хамтдаа сайжруулцгаая!</h2><p>Сургуулийн сүлжээний чанарын талаар санал хүсэлтээ илгээнэ үү.</p><button onClick={() => { setActiveTab("survey"); setNotice(""); }}>Үнэлгээгээ өгөх <b>→</b></button></div><div className="survey-progress"><i /><span>0 / 8</span></div><span className="survey-spark">✦</span></section>
-            <section className="ulms-panel research-panel"><h2>СУДАЛГАА</h2><p>Одоогоор идэвхтэй судалгаа байхгүй байна.</p></section></div>
-        </div>}
-        {activeTab === "library" && <section className="ulms-page-panel"><div className="ulms-section-heading"><div><span>2026–2027 · НАМРЫН УЛИРАЛ</span><h2>Хичээл сонголт</h2><p>Судлах хичээлээ сонгож, бүртгэлээ шалгана уу.</p></div><button onClick={() => setModal("enroll")}>＋ Хичээл сонгох</button></div><div className="ulms-course-grid">{courses.map((course, index) => <article key={course.id}><span className={`course-dot tone-${index % 4}`}>{["⌘", "◉", "✳", "∑"][index % 4]}</span><small>{["M.SW315", "M.SW306", "M.SW213", "M.SW322"][index % 4]} · Лекц</small><h3>{course.title}</h3><p>{course.teacher} · {course.room}</p><div>{course.schedule}<button onClick={() => setEnrolledIds((current) => current.includes(course.id) ? current.filter((id) => id !== course.id) : [...current, course.id])}>{enrolledIds.includes(course.id) ? "Бүртгэлтэй ✓" : "Сонгох +"}</button></div></article>)}</div></section>}
-        {activeTab === "schedule" && <section className="ulms-page-panel"><div className="ulms-section-heading"><div><span>{year} · НАМРЫН УЛИРАЛ</span><h2>Миний хичээлийн хуваарь</h2><p>Долоо хоногийн лекц, семинарын цаг.</p></div><button onClick={() => window.print()}>Хэвлэх ↗</button></div><div className="week-grid">{weekdays.map((day, dayIndex) => <section className={`weekday-column day-${dayIndex}`} key={day}><h2>{day}</h2><div className="weekday-lessons">{timetable[dayIndex].map((lesson, index) => <article className={`lesson-card ${lesson.color}`} key={`${lesson.title}-${index}`}><span className="lesson-time">{lesson.time}</span><strong>{lesson.title}</strong><small>{lesson.teacher}</small></article>)}</div></section>)}</div></section>}
-        {activeTab === "grades" && <section className="ulms-page-panel"><div className="ulms-section-heading"><div><span>СУРГАЛТЫН АМЖИЛТ</span><h2>Дүнгийн мэдээлэл</h2><p>Багш дүн оруулсны дараа энд харагдана.</p></div></div><div className="ulms-empty-panel">▤<strong>Дүн бүртгэгдээгүй байна</strong><span>Улирлын дүнгийн мэдээллийг энд нэгтгэнэ.</span></div></section>}
-        {activeTab === "survey" && <section className="ulms-page-panel"><div className="ulms-section-heading"><div><span>ОЮУТНЫ САНАЛ</span><h2>Судалгаа, санал асуулга</h2><p>Сургалтын орчныг сайжруулах судалгаанд оролцоорой.</p></div></div><button className="ulms-survey-row" onClick={() => setNotice("Судалгаа бүртгэгдлээ. Баярлалаа!")}><span>▥</span><div><strong>Сургуулийн WiFi сүлжээний судалгаа</strong><small>6 хоног үлдлээ · 8 асуулт</small></div><b>Санал өгөх →</b></button></section>}
-        <footer className="ulms-footer">© 2026 Сургаал Их Сургууль <span>University Learning Management System</span></footer>
-      </div>
-    </section>
-    {modal && <div className="modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setModal(null); }}><form className="modal-card" action={modal === "add" ? addProgram : enrollCourse}><button type="button" className="modal-close" onClick={() => setModal(null)}>×</button><div className="eyebrow">ИХ СУРГУУЛИЙН СУРГАЛТЫН СИСТЕМ</div><h2>{modal === "add" ? "Сургалтын хөтөлбөр нэмэх" : "Хичээл сонгох"}</h2><p>{modal === "add" ? "Тэнхим болон хөтөлбөрийн мэдээллийг бүртгэнэ үү." : "Энэ улиралд судлах хичээлээ сонгоно уу."}</p>{modal === "add" ? <><label>Хөтөлбөрийн нэр<input name="name" required placeholder="Жишээ: Программ хангамж" /></label><label>Сургууль, тэнхим<input name="faculty" required placeholder="Жишээ: Мэдээллийн технологийн сургууль" /></label><label>Зэрэг, хугацаа<input name="degree" required placeholder="Жишээ: Бакалавр · 4 жил" /></label></> : <label>Хичээл<select name="courseId" required defaultValue=""><option value="" disabled>Хичээл сонгох</option>{courses.filter((course) => !enrolledIds.includes(course.id)).map((course) => <option key={course.id} value={course.id}>{course.title} · {course.teacher}</option>)}</select></label>}<div className="modal-actions"><button type="button" className="secondary-button" onClick={() => setModal(null)}>Болих</button><button type="submit" className="primary-button">{modal === "add" ? "Хөтөлбөр хадгалах" : "Хичээл бүртгүүлэх"}</button></div></form></div>}
-  </main>;
+  if (!ready || !session) return <main className="sg-auth-loading"><span className="sg-spinner" /><p>Сургалтын орчин ачаалж байна…</p></main>;
+  const allowed = navigation(session.role).some(link => link.key === section);
+  const page = section === "courses" && session.role === "teacher" ? { title: "Миний заадаг хичээлүүд", description: "Танд хуваарилсан хичээлүүд болон сургалтын мэдээлэл." }
+    : section === "students" && session.role === "teacher" ? { title: "Миний оюутнууд", description: "Таны хичээлд админаар баталгаажсан оюутнуудын мэдээлэл." }
+    : section === "schedule" && session.role === "admin" ? { title: "Хуваарь зохицуулах", description: "Хичээлийн өдөр, цаг, өрөөг тохируулж давхцлыг шалгана." }
+    : section === "selection" && session.role === "admin" ? { title: "Сонголтын хүсэлтүүд", description: "Оюутны хүсэлтүүдийг хянаж баталгаажуулна." }
+    : section === "grades" && session.role === "teacher" ? { title: "Дүн оруулах", description: "Өөрийн хичээлийн оюутнуудад үнэлгээ оруулах." } : info[section];
+  const dialogTitle = dialog?.type === "course" ? dialog.course ? "Хичээл засах" : "Шинэ хичээл" : dialog?.type === "student" ? "Оюутан бүртгэх" : dialog?.type === "delete" ? "Бичлэг устгах" : dialog?.type === "detail" ? dialog.course.title : "";
+  return <div className="sg-workspace">
+    <Sidebar section={section} open={navOpen} onClose={() => setNavOpen(false)} onSignOut={() => { signOut(); router.replace("/login"); }} />
+    <div className="sg-workspace-body">
+      <header className="sg-topbar"><div className="sg-topbar-left"><button className="sg-icon-button sg-mobile-menu" onClick={() => setNavOpen(true)} aria-label="Цэс нээх" aria-expanded={navOpen} aria-controls="app-sidebar"><Icon name="menu" /></button><span className="sg-breadcrumb">Миний орчин <span>/</span> <strong>{page.title}</strong></span></div><div className="sg-topbar-user"><span className="sg-role-tag">{session.role === "admin" ? "Админ" : session.role === "teacher" ? "Багш" : "Оюутан"}</span><span className="sg-avatar sg-avatar-light">{session.name.charAt(0).toUpperCase()}</span><strong>{session.name}</strong>{session.role === "student" && <button className="sg-button sg-secondary sg-topbar-signout" onClick={() => { signOut(); router.replace("/login"); }}><Icon name="logout" size={16} /><span>Гарах</span></button>}</div></header>
+      <main className="sg-content"><div className="sg-page-heading"><div><span className="sg-eyebrow">EDURA · СУРГАЛТЫН СИСТЕМ</span><h1>{page.title}</h1><p>{page.description}</p></div><div className="sg-heading-actions">{section !== "planner" && <button className="sg-button sg-secondary" onClick={() => void load()} disabled={refreshing}><Icon name="refresh" /><span>{refreshing ? "Шинэчилж байна" : "Шинэчлэх"}</span></button>}{(section === "courses" && isAdmin || section === "students" && isAdmin) && <button className="sg-button sg-primary" onClick={() => open(section === "courses" ? { type: "course" } : { type: "student" })}><Icon name="plus" />{section === "courses" ? "Хичээл нэмэх" : "Оюутан бүртгэх"}</button>}</div></div>
+      {notice && <div className="sg-success" role="status"><Icon name="check" />{notice}</div>}
+      {error && <div className="sg-error" role="alert">{error}<button onClick={() => void load()}>Дахин оролдох</button></div>}
+      {!allowed ? <EmptyState title="Энэ хэсэгт хандах эрхгүй" text="Өөрийн сургалтын орчны цэсээс тохирох хэсгийг сонгоно уу." />
+        : section === "overview" ? <AcademicHome courses={courses} students={students} />
+        : section === "teachers" ? <TeacherDirectory />
+        : section === "planner" ? <Curriculum courses={courses} />
+        : section === "assignments" || section === "exams" ? <AssessmentManager key={`${session.name}-${section}`} kind={section === "exams" ? "exam" : "assignment"} />
+        : section === "grades" ? <Gradebook courses={courses} />
+        : section === "schedule" ? <ScheduleBoard onSaved={() => void load()} />
+        : section === "selection" ? <CourseSelection courses={courses} mode="requests" />
+        : !loaded && !error ? <div className="sg-skeleton" role="status" aria-label="Өгөгдөл ачаалж байна"><i /><i /><i /></div> : !loaded ? null : <>
+        {section === "courses" && <><div className="sg-overview-strip"><div><span className="sg-stat-icon"><Icon name="book" /></span><div><strong>{courses.length}</strong><span>Нийт хичээл</span></div></div><div><span className="sg-stat-icon sg-stat-blue"><Icon name="users" /></span><div><strong>{teachers.length}</strong><span>Хичээл зааж буй багш</span></div></div><div><span className="sg-stat-icon sg-stat-orange"><Icon name="calendar" /></span><div><strong>{new Set(courses.map(course => course.room)).size}</strong><span>Ашиглаж буй өрөө</span></div></div></div><section className="sg-panel"><div className="sg-panel-toolbar"><div><h2>Хичээлийн жагсаалт <span className="sg-count">{filteredCourses.length}</span></h2><p>Нэр дээр дарж дэлгэрэнгүй мэдээллийг хараарай.</p></div><div className="sg-filters"><label className="sg-search"><Icon name="search" /><input aria-label="Хичээл хайх" placeholder="Хичээл, багш, өрөөгөөр хайх" value={query} onChange={e => setQuery(e.target.value)} />{query && <button onClick={() => setQuery("")} aria-label="Хайлт цэвэрлэх"><Icon name="close" size={16} /></button>}</label><select aria-label="Багшаар шүүх" value={teacher} onChange={e => setTeacher(e.target.value)}><option value="">Бүх багш</option>{teachers.map(name => <option key={name}>{name}</option>)}</select></div></div>{filteredCourses.length ? <div className="sg-course-table"><CourseList courses={filteredCourses} enrollmentCount={enrollmentCount} canEdit={isAdmin} canDelete={isAdmin} onOpen={openCourse} onEdit={editCourse} onDelete={deleteCourse} /></div> : <EmptyState title={courses.length ? "Хайлттай тохирох хичээл алга" : "Эхний хичээлээ нэмээрэй"} text={courses.length ? "Өөр нэрээр хайх эсвэл багшийн шүүлтүүрээ цэвэрлээрэй." : "Хичээл нэмснээр нэр, багш, хуваарь нь энд харагдана."} action={courses.length ? "Шүүлтүүр цэвэрлэх" : isAdmin ? "Хичээл нэмэх" : undefined} onAction={() => courses.length ? (setQuery(""), setTeacher("")) : open({ type: "course" })} />}</section></>}
+        {section === "students" && (canManage ? <section className="sg-panel"><div className="sg-panel-toolbar"><div><h2>Оюутны бүртгэл <span className="sg-count">{students.length}</span></h2><p>Бүртгэлийн мэдээлэл болон сонгосон хичээл.</p></div><label className="sg-search"><Icon name="search" /><input placeholder="Нэр, имэйл, хөтөлбөрөөр хайх" aria-label="Оюутан хайх" value={query} onChange={e => setQuery(e.target.value)} /></label></div>{filteredStudents.length ? <div className="sg-table-scroll"><table className="sg-table"><thead><tr><th>Оюутан</th><th>Хөтөлбөр</th><th>Сонгосон хичээл</th>{isAdmin && <th><span className="sg-sr-only">Үйлдэл</span></th>}</tr></thead><tbody>{filteredStudents.map(student => <tr key={student.id}><td><div className="sg-person"><span className="sg-avatar sg-avatar-light">{studentName(student).charAt(0)}</span><div><strong>{studentName(student)}</strong><small>{student.code} · {student.email}</small></div></div></td><td>{student.program || "—"}</td><td>{student.selectedCourses?.length ? student.selectedCourses.map(course => `${course.title} (${course.status === "approved" ? "зөвшөөрсөн" : course.status === "rejected" ? "татгалзсан" : "хүлээгдэж буй"})`).join(", ") : "Сонгоогүй"}</td>{isAdmin && <td><button className="sg-icon-button sg-danger-icon" aria-label={`${studentName(student)} устгах`} onClick={() => open({ type: "delete", kind: "student", id: String(student.id), title: studentName(student) })}><Icon name="trash" size={18} /></button></td>}</tr>)}</tbody></table></div> : <EmptyState icon="users" title={students.length ? "Тохирох оюутан олдсонгүй" : session.role === "teacher" ? "Таны хичээлд баталгаажсан оюутан алга" : "Оюутан хараахан бүртгэгдээгүй"} text={students.length ? "Хайлтын утгаа өөрчлөөд дахин хайгаарай." : session.role === "teacher" ? "Админ хичээл сонголтыг баталсны дараа оюутны мэдээлэл энд харагдана. Дараа нь Шинэчлэх товчийг дарна уу." : "Эхний оюутнаа бүртгэж, хичээлтэй нь холбоорой."} action={students.length && isAdmin ? "Хайлтыг цэвэрлэх" : !students.length && isAdmin ? "Оюутан бүртгэх" : undefined} onAction={() => students.length ? setQuery("") : open({ type: "student" })} />}</section> : <EmptyState title="Энэ хэсэгт эрх хүрэхгүй байна" text="Оюутны бүртгэлийг багш болон администратор удирдана." />)}
+        {section === "attendance" && <Attendance courses={courses} students={students} />}
+        {section === "reports" && <section className="sg-panel sg-report-panel">{reportOpen ? <Report /> : <EmptyState icon="chart" title="Бүртгэлийн ерөнхий тайлан" text="Хичээл, оюутан, багшийн хамгийн сүүлийн бүртгэлийн тоог харна." action="Тайлан харах" onAction={() => setReportOpen(true)} />}</section>}
+      </>}
+      <footer className="sg-footer"><span>EDURA · Сургалтын орчин</span><span>Хичээлдээ төвлөр. Бусдыг цэгцэл.</span></footer></main>
+    </div>
+    <Modal open={!!dialog} title={dialogTitle} busy={busy} onClose={() => setDialog(null)}>
+      {dialog?.type === "detail" ? <><div className="sg-course-detail"><span className="sg-detail-emblem"><Icon name="book" size={32} /></span><p>Хичээлийн мэдээлэл</p><dl><div><dt>Багш</dt><dd>{dialog.course.teacher}</dd></div><div><dt>Хуваарь</dt><dd>{dialog.course.schedule}</dd></div><div><dt>Өрөө</dt><dd>{dialog.course.room}</dd></div><div><dt>Зөвшөөрсөн оюутан</dt><dd>{enrollmentCount(dialog.course.id)}</dd></div></dl></div><div className="sg-dialog-actions"><button className="sg-button sg-secondary" onClick={() => setDialog(null)}>Хаах</button>{session.role === "student" && <button className="sg-button sg-primary" onClick={() => { setDialog(null); router.push("/course-selection"); }}>Хичээл сонгох</button>}{isAdmin && <button className="sg-button sg-primary" onClick={() => editCourse(dialog.course)}>Мэдээлэл засах</button>}</div></> : <form onSubmit={saveForm} key={dialog?.type === "course" ? dialog.course?.id || "new" : dialog?.type}>
+        {dialog?.type === "course" && <div className="sg-form-fields"><div className="sg-form-row"><label>Хичээлийн код<input name="code" maxLength={120} defaultValue={dialog.course?.code} placeholder="M.SW322" /></label><label>Кредит<input name="credits" type="number" min="0.5" max="30" step="0.5" required defaultValue={dialog.course?.credits||3} /></label></div><div className="sg-form-row"><label>Курс<select name="year" defaultValue={dialog.course?.year||1}>{[1,2,3,4].map(y=><option key={y} value={y}>{y}-р курс</option>)}</select></label><label>Улирал<select name="semester" defaultValue={dialog.course?.semester||1}>{[1,2,3,4,5,6,7,8].map(y=><option key={y} value={y}>{y}-р улирал</option>)}</select></label></div><label>Хичээлийн нэр<input name="title" required maxLength={120} defaultValue={dialog.course?.title} placeholder="Жишээ: Веб систем ба технологи" /></label><label>Багш<select name="teacher" required defaultValue={dialog.course?.teacher||''}><option value="">Багш сонгох</option>{teacherProfiles.map(t=><option key={t.id} value={t.username}>{t.displayName} ({t.username})</option>)}</select></label><div className="sg-form-row"><label>Хуваарь<input name="schedule" required readOnly={!!dialog.course} defaultValue={dialog.course?.schedule} placeholder="Даваа, 09:00–10:30" /></label><label>Өрөө<input name="room" required readOnly={!!dialog.course} defaultValue={dialog.course?.room} placeholder="A-205" /></label></div></div>}
+        {dialog?.type === "student" && <div className="sg-form-fields"><label>Оюутны код<input name="code" required placeholder="ST2026001" /></label><div className="sg-form-row"><label>Овог<input name="lastName" required placeholder="Бат" /></label><label>Нэр<input name="firstName" required placeholder="Номин" /></label></div><label>Имэйл<input name="email" type="email" required placeholder="student@example.com" /></label><label>Хөтөлбөр<input name="program" required={!mongoStudents} placeholder="Программ хангамж" /></label></div>}
+        {dialog?.type === "delete" && <p className="sg-delete-description"><strong>{dialog.title}</strong> бичлэгийг устгах уу? Энэ үйлдлийг буцаах боломжгүй.</p>}
+        {formError && <p role="alert" className="sg-form-error">{formError}</p>}
+        <div className="sg-dialog-actions"><button type="button" className="sg-button sg-secondary" onClick={() => setDialog(null)} disabled={busy}>Болих</button><button type="submit" disabled={busy} className={`sg-button ${dialog?.type === "delete" ? "sg-danger" : "sg-primary"}`}>{busy ? "Хадгалж байна…" : dialog?.type === "delete" ? "Устгах" : "Хадгалах"}</button></div>
+      </form>}
+    </Modal>
+  </div>;
 }

@@ -18,7 +18,7 @@ export default function InteractiveCourseList({ courses }: { courses: Searchable
     setIsLoading(true);
     setError("");
     try {
-      const data = await apiRequest<SearchableCourse[] | { courses: SearchableCourse[] }>("/courses", {}, false);
+      const data = await apiRequest<SearchableCourse[] | { courses: SearchableCourse[] }>("/api/courses");
       setCourseList(Array.isArray(data) ? data : data.courses ?? []);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Хичээлүүдийг татахад алдаа гарлаа.");

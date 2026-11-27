@@ -1,0 +1,16 @@
+[
+  {
+    "id": 10,
+    "code": "ST2026010",
+    "firstName": "Саруул",
+    "lastName": "Эрдэнэ",
+    "email": "saruul@example.com"
+  },
+  {
+    "id": 11,
+    "code": "ST2026011",
+    "firstName": "Тэмүүлэн",
+    "lastName": "Бат",
+    "email": "temuulen@example.com"
+  }
+]

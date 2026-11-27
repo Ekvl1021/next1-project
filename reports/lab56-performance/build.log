@@ -1,0 +1,57 @@
+
+> my-app@0.1.0 build
+> next build --webpack
+
+▲ Next.js 16.4.2 (webpack)
+- Environments: .env.local
+⚠ Warning: Next.js ignored package-lock.json in /Users/macbookair/Documents/NEXT_1 because it is outside the current Git repository (/Users/macbookair/Documents/NEXT_1/my-app).
+ To use this directory, set `outputFileTracingRoot` in your Next.js config.
+
+✓ Running next.config.ts took 82ms
+- Cache Components enabled
+- Partial Prefetching enabled
+
+  Creating an optimized production build ...
+⚠ Your version of Next.js is affected by a known security vulnerability. This command is continuing after the upgrade reminder.
+Reference: https://registry.npmjs.org/-/npm/v1/security/advisories/bulk
+✓ Compiled successfully in 11.7s
+  Running TypeScript ...
+
+  We detected TypeScript in your project and reconfigured your tsconfig.json file for you.
+  The following suggested values were added to your tsconfig.json. These values can be changed to fit your project's needs:
+
+  	- include was updated to add '.next-lab-performance/types/**/*.ts'
+  	- include was updated to add '.next-lab-performance/dev/types/**/*.ts'
+
+  Finished TypeScript in 1624ms ...
+  Collecting page data using 7 workers ...
+  Generating static pages using 7 workers (0/17) ...
+  Generating static pages using 7 workers (4/17) 
+  Generating static pages using 7 workers (8/17) 
+  Generating static pages using 7 workers (12/17) 
+✓ Generating static pages using 7 workers (17/17) in 289ms
+  Finalizing page optimization ...
+  Collecting build traces ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ○ /about-courses
+├ ƒ /api/lab-cache
+├ ○ /courses
+├ ○ /courses-client
+├ ◐ /courses-server
+├ ○ /dashboard
+├ ○ /login
+├ ○ /reports
+├ ○ /reports/baseline
+├ ○ /reports/eager
+├ ○ /reports/optimized
+├ ○ /reports/render-test
+└ ○ /students
+
+
+○  (Static)             prerendered as static content
+◐  (Partial Prerender)  prerendered as static HTML with dynamic server-streamed content
+ƒ  (Dynamic)            server-rendered on demand
+

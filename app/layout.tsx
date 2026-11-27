@@ -4,6 +4,8 @@ import AuthExpirationGuard from "../components/AuthExpirationGuard";
 import Header from "../components/Header";
 import Providers from "./providers";
 import "./globals.css";
+import "./ui.css";
+import "./portal.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,7 +18,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Surgaal — Их сургуулийн сургалтын систем",
+  title: "EDURA — Их сургуулийн сургалтын систем",
   description: "Их сургуулийн оюутан, хөтөлбөр, хичээл, багшийн нэгдсэн систем.",
 };
 

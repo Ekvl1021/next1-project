@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Icon from "../../components/Icon";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
 import { getTokenExpirationMs } from "../../lib/auth-session";
@@ -14,6 +15,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   async function signIn(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -43,12 +45,8 @@ export default function LoginPage() {
     }
   }
 
-  return <main className="ulms-login-page">
-    <div className="campus-skyline" aria-hidden="true"><span /><i /><b /><em /></div>
-    <section className="ulms-login-card">
-      <div className="ulms-login-brand"><div className="university-seal"><span>✦</span><b>С</b></div><div className="university-name">СУРГААЛ ИХ СУРГУУЛЬ<small>СУРГАЛТЫН УДИРДЛАГА</small></div><h1>СУРГАЛТЫН УДИРДЛАГА<br />МЕНЕЖМЕНТИЙН ЦАХИМ СИСТЕМ</h1><p>University Learning Management System</p></div>
-      <div className="ulms-login-form-panel"><div className="login-form-wrap"><div className="login-eyebrow">ТАВТАЙ МОРИЛ</div><h2>СИСТЕМД НЭВТРЭХ</h2><form onSubmit={signIn}><label className="ulms-field"><span aria-hidden="true">♟</span><input autoComplete="username" value={username} onChange={(event) => { setUsername(event.target.value); setError(""); }} placeholder="Нэвтрэх нэр" aria-label="Нэвтрэх нэр" required /></label><label className="ulms-field"><span aria-hidden="true">▣</span><input type="password" autoComplete="current-password" value={password} onChange={(event) => { setPassword(event.target.value); setError(""); }} placeholder="Нууц үг" aria-label="Нууц үг" required /></label>{error && <div className="login-error" role="alert">{error}</div>}<div className="ulms-submit-row"><button type="submit" disabled={busy}>{busy ? "Шалгаж байна…" : <>Нэвтрэх <span>→</span></>}</button></div></form><div className="ulms-copyright">Copyright © 2026 University Learning Management</div></div></div>
-    </section>
-    <Link href="/" className="ulms-back-home">← Нүүр хуудас</Link>
+  return <main className="sg-login">
+    <section className="sg-login-story"><Link href="/" className="sg-brand"><span className="sg-brand-icon"><Icon name="cap" size={28} /></span><span>EDURA<span className="sg-brand-period">.</span><small>СУРГАЛТЫН ОРЧИН</small></span></Link><div className="sg-login-message"><span className="sg-login-kicker">СУРАЛЦАХАД ТӨВЛӨРСӨН ОРЧИН</span><h1>Өдөр бүрийг<br />арай цэгцтэй.</h1><p>Хичээл, төлөвлөгөө, суралцах ахицаа<br />нэг дороос удирдаарай.</p><div className="sg-login-features"><span><Icon name="book" />Хичээлийн мэдээлэл</span><span><Icon name="calendar" />Хичээл сонголт ба хуваарь</span><span><Icon name="chart" />Кредитээр жигнэсэн голч</span></div></div><small className="sg-login-copyright">EDURA · Сургалтын удирдлагын систем</small></section>
+    <section className="sg-login-form-section"><div className="sg-login-form"><span className="sg-eyebrow">ТАВТАЙ МОРИЛ</span><h2>Дахин уулзахад таатай байна.</h2><p>Өөрийн бүртгэлээр сургалтын орчиндоо нэвтэрнэ үү.</p><form onSubmit={signIn}><label>Нэвтрэх нэр<input autoComplete="username" value={username} onChange={event => { setUsername(event.target.value); setError(""); }} placeholder="Таны нэвтрэх нэр" required /></label><label>Нууц үг<span className="sg-password"><input type={showPassword ? "text" : "password"} autoComplete="current-password" value={password} onChange={event => { setPassword(event.target.value); setError(""); }} placeholder="Нууц үгээ оруулна уу" required /><button type="button" onClick={() => setShowPassword(value => !value)} aria-label={showPassword ? "Нууц үг нуух" : "Нууц үг харуулах"} aria-pressed={showPassword}><Icon name="eye" size={19} /></button></span></label>{error && <p className="sg-login-error" role="alert">{error}</p>}<button className="sg-button sg-primary sg-login-submit" type="submit" disabled={busy}>{busy ? "Нэвтэрч байна…" : "Нэвтрэх"}</button></form><Link href="/" className="sg-login-home">Нүүр хуудас руу буцах</Link></div></section>
   </main>;
 }

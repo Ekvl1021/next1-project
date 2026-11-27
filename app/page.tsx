@@ -1,12 +1,5 @@
-import Welcome from "../components/Welcome";
-
+import Link from "next/link";
+import Icon from "../components/Icon";
 export default function Home() {
-  return (
-    <main className="home-demo-page">
-      <span>СУРГАЛТЫН СИСТЕМ</span>
-      <h1>University Course Management</h1>
-      <Welcome />
-      <p>Сургалтын удирдлагын систем</p>
-    </main>
-  );
+  return <main className="sg-public"><header><Link href="/" className="sg-public-brand"><span className="sg-brand-icon"><Icon name="cap" size={27} /></span>EDURA<span>.</span></Link><Link href="/login" className="sg-button sg-secondary">Нэвтрэх</Link></header><section className="sg-public-hero"><div><span className="sg-eyebrow">ТАНЫ СУРГАЛТЫН ОРЧИН</span><h1>Илүү цэгцтэй.<br /><em>Илүү төвлөрсөн.</em></h1><p>Хичээлийн мэдээллээ харж, долоо хоногоо төлөвлөж,<br />суралцах ахицаа нэг дороос удирдаарай.</p><Link href="/login" className="sg-button sg-primary">Сургалтын орчинд нэвтрэх</Link><div className="sg-public-caption"><span /><span>Хичээл · Хуваарь · Төлөвлөгөө · Голч</span></div></div><div className="sg-public-visual" aria-hidden="true"><div className="sg-orbit sg-orbit-one" /><div className="sg-orbit sg-orbit-two" /><div className="sg-public-emblem"><Icon name="cap" size={70} /></div><span className="sg-float sg-float-book"><Icon name="book" size={28} /><span>Хичээлүүд</span></span><span className="sg-float sg-float-plan"><Icon name="calendar" size={28} /><span>Миний төлөвлөгөө</span></span><span className="sg-float sg-float-chart"><Icon name="chart" size={28} /><span>Суралцах ахиц</span></span></div></section><section className="sg-public-features">{[{icon:"book" as const,title:"Хичээлээ нэг дороос",text:"Багш, хуваарь, өрөөний мэдээллээ хялбархан хайж олоорой."},{icon:"calendar" as const,title:"Баталгаажсан хуваарь",text:"Хичээл сонголтоо илгээж, админаар баталгаажсан хуваариа хараарай."},{icon:"cap" as const,title:"Ахицдаа анхаар",text:"Кредит, үнэлгээгээ оруулж улирлын болон нийт голчоо тооцоолоорой."}].map(item=><article key={item.title}><Icon name={item.icon} size={25} /><h2>{item.title}</h2><p>{item.text}</p></article>)}</section><footer>EDURA · Суралцахад илүү зай гарга.</footer></main>;
 }

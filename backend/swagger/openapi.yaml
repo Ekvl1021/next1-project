@@ -1,0 +1,309 @@
+openapi: 3.0.3
+info:
+  title: 'University Course Management API'
+  version: 1.0.0
+  description: 'JSON файлд суурилсан сургалтын API. Authorize хэсэгт JWT token-оо Bearer угтваргүй оруулна. Course нь төслийн title, teacher, schedule, room талбаруудыг ашиглана.'
+servers:
+  -
+    url: /
+    description: 'Current backend origin'
+security:
+  -
+    BearerAuth: []
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    CourseInput:
+      type: object
+      required:
+        - title
+        - teacher
+        - schedule
+        - room
+      properties:
+        title:
+          type: string
+          minLength: 1
+          example: 'Веб систем ба технологи'
+        teacher:
+          type: string
+          minLength: 1
+          example: teacher1
+        schedule:
+          type: string
+          minLength: 1
+          example: 'Monday 10:00'
+        room:
+          type: string
+          minLength: 1
+          example: A-301
+    CourseUpdate:
+      type: object
+      minProperties: 1
+      properties:
+        title:
+          type: string
+          minLength: 1
+          example: 'Веб систем ба технологи'
+        teacher:
+          type: string
+          minLength: 1
+          example: teacher1
+        schedule:
+          type: string
+          minLength: 1
+          example: 'Monday 10:00'
+        room:
+          type: string
+          minLength: 1
+          example: A-301
+    Course:
+      allOf:
+        -
+          $ref: '#/components/schemas/CourseInput'
+        -
+          type: object
+          properties:
+            id:
+              type: string
+              example: '123'
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+        errors:
+          type: array
+          items:
+            type: string
+    User:
+      type: object
+      properties:
+        id:
+          oneOf:
+            -
+              type: integer
+            -
+              type: string
+        username:
+          type: string
+        role:
+          type: string
+          enum:
+            - admin
+            - teacher
+            - student
+    Login:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          example: admin
+        password:
+          type: string
+          format: password
+          example: Admin123!
+    Session:
+      type: object
+      properties:
+        token:
+          type: string
+        user:
+          $ref: '#/components/schemas/User'
+paths:
+  /api/auth/login:
+    post:
+      summary: 'Нэвтрэх / JWT авах'
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Login'
+      responses:
+        '200':
+          description: 'Logged in'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Session'
+        '400':
+          description: 'Invalid request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 'Authentication required or invalid/expired token'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/courses:
+    get:
+      summary: 'Хичээлийн жагсаалт, хайлт'
+      parameters:
+        -
+          name: search
+          in: query
+          schema:
+            type: string
+          description: 'Search title, teacher, schedule or room'
+      responses:
+        '200':
+          description: Courses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Course'
+        '401':
+          description: 'Authentication required or invalid/expired token'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      summary: 'Хичээл нэмэх (admin, teacher)'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CourseInput'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Course'
+        '400':
+          description: 'Invalid request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 'Authentication required or invalid/expired token'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 'Permission denied'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  '/api/courses/{id}':
+    parameters:
+      -
+        name: id
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      summary: 'Хичээлийн мэдээлэл'
+      responses:
+        '200':
+          description: Course
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Course'
+        '401':
+          description: 'Authentication required or invalid/expired token'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 'Resource not found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    put:
+      summary: 'Хичээл засах (admin, teacher); зөвхөн өөрчлөх талбараа илгээнэ'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CourseUpdate'
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Course'
+        '400':
+          description: 'Invalid request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 'Authentication required or invalid/expired token'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 'Permission denied'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 'Resource not found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      summary: 'Хичээл устгах (admin)'
+      responses:
+        '204':
+          description: 'Deleted; no response body'
+        '401':
+          description: 'Authentication required or invalid/expired token'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 'Permission denied'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 'Resource not found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/demo-error:
+    get:
+      summary: 'Error handler турших'
+      security: []
+      responses:
+        '500':
+          description: 'Internal server error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
