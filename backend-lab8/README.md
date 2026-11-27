@@ -1,173 +1,164 @@
-# Лаборатори №8 — MongoDB
+# EDURA backend — Express ба MongoDB
 
-Лаборатори №7-ийн `../backend`-ийг хуулж энэ тусдаа backend-ийг үүсгэсэн. Хуучин JSON файлууд хадгалагдсан. MongoDB Student API нь лаборатори №8-ын шинэ contract-ыг ашигладаг; хуучин Next.js frontend-ийн `name/program` form болон array response-д зориулсан кодыг энэ лабораторид өөрчлөөгүй. Swagger эсвэл Postman-аар шинэ API-г туршина.
+Одоогийн frontend-ийн backend. Student, Course, Teacher, Room, Department болон сургалтын бусад мэдээллийг Mongoose/MongoDB-оос уншиж хадгална. `../backend/` нь өмнөх JSON хувилбар.
 
-## Ажиллуулах
+## Холболт ба ажиллуулах
 
-Workspace-ийн root дотор MongoDB Community Server, Database Tools, mongosh-ийг `.local-tools/` дотор локал суулгасан. Системийн Homebrew эсвэл PATH-ийг өөрчлөөгүй. MongoDB өгөгдөл `.local-mongodb/data`, log `.local-mongodb/mongod.log` дотор байна.
+| Үйлчилгээ | Утга |
+|---|---|
+| API | `http://localhost:3002` |
+| Swagger | `http://localhost:3002/api-docs/` |
+| Frontend origin | `http://localhost:3001` |
+| MongoDB | `127.0.0.1:27017` |
+| Database | `universityDb` |
 
-```sh
-cd my-app/backend-lab8
-npm install
-# Terminal 1: localhost:27017
-npm run db:start
-# Terminal 2: MongoDB холбогдсоны дараа localhost:3002
+Одоогийн компьютер дээр MongoDB нь Homebrew service:
+
+```bash
+brew services start mongodb-community
+cd /Users/macbookair/Documents/NEXT_1/my-app/backend-lab8
 npm start
 ```
 
-MongoDB аль хэдийн ажиллаж байвал дахин `db:start` ажиллуулахгүй. `.env` дотор MongoDB-ийн `MONGODB_HOST`, `MONGODB_PORT`, `MONGODB_DATABASE`, `MONGODB_USERNAME`, `MONGODB_PASSWORD`, `MONGODB_AUTH_SOURCE` тохиргоог тус тусад нь хадгална; `config/db.js` эдгээрээс connection URI-г байгуулна. Compass-д ижил утгуудаар нэвтэрнэ. Өөр компьютерт `.env.example`-ийг хуулж жинхэнэ нууц үг болон JWT_SECRET тохируулна. Lab 7 нь 3000 порт дээр тусдаа хэвээр байна.
+Код өөрчлөх үед `npm run dev` нь Node watch горим ашиглана. Backend MongoDB-д амжилттай холбогдсоны дараа HTTP серверээ асаана. MongoDB аль хэдийн ажиллаж байвал дахин сервер асаахгүй. Хуучин 27018 сервер зогссон; одоогийн backend, Compass, mongosh бүгд 27017 ашиглана.
 
-Swagger: <http://localhost:3002/api-docs/>. Login `/api/auth/login` эсвэл `/auth/login`; demo admin `admin / Admin123!`, teacher `teacher1 / Teacher123!`, student `student1 / Student123!` (өмнөх seed-ийн password-ийг өөрчлөөгүй тохиолдолд). Authorize-д JWT-г Bearer угтваргүй оруулна. Token-ийн хугацаа `.env`-ийн JWT_EXPIRES_IN-ээс хамаарна.
+`npm run db:start` нь localhost портыг шалгаад, сервер байхгүй үед workspace-ийн хуучин `.local-mongodb/data` хавтсаас MongoDB асаах fallback helper юм. Энэ нь Homebrew-ийн одоогийн data directory биш тул одоогийн орчинд Homebrew service-ээ ашиглана. Homebrew config: `/opt/homebrew/etc/mongod.conf`, data: `/opt/homebrew/var/mongodb`.
 
-## Хэрэгжүүлсэн зүйл
+## Орчны тохиргоо
 
-- `config/db.js`: Mongoose холболт; холболт болон index амжилттай болсны дараа сервер асна.
-- `models/Student.js`: Number `id`, code, firstName, lastName, email, timestamps; id/code/email unique index. `_id` нь MongoDB ObjectId хэвээр, API id-тай солихгүй.
-- `controllers/student-controller.js`, `routes/student-routes.js`: MongoDB Student CRUD. ID-г atomic counter-оор үүсгэнэ, гаднаас импортолсон хамгийн их id-г мөн тооцно. Алдаатай create үед ID алгасаж болно.
-- GET `/api/students?search=номин&page=1&limit=5`: firstName/lastName/code literal хайлт, өсөх id эрэмбэ, pagination; limit хамгийн их 100.
-- GET `/api/students/:id`, POST, PUT, DELETE. `/students` alias мөн ижил шинэ contract ашиглана.
-- GET/POST/PUT: admin эсвэл teacher; DELETE: admin. Student role нь №8-ын route бодлогын дагуу 403 авна. Course-ийн өмнөх role бодлого хэвээр.
-- `validateStudent`: POST/PUT дөрвөн үндсэн талбарыг заавал авна; id/_id болон үл мэдэгдэх талбарыг оруулахгүй. program/courseId optional. Буруу ID/body 400, олдохгүй бол 404, duplicate code/email 409.
-- JWT, CORS, logger, төвлөрсөн error handler, demo-error болон Swagger хадгалсан. Student schema/security/response болон query-уудыг OpenAPI-д нэмсэн.
-- `scripts/migrate.js`: students/courses/teachers/departments migration, numeric id conversion, duplicate preflight. Existing ID-г дарж бичихгүй, давтан ажиллуулахад нэмэлт duplicate үүсгэхгүй.
-- `scripts/migration-report.js`: эх JSON/MongoDB count, нэмэлт ID, missing/different fields, duplicate id/code/email, `$type` тайлан.
-- `scripts/clean-student-ids.js`: CSV-ийн string id-г Number болгоно; invalid/colliding ID байвал өөрчлөхөөс өмнө зогсоно.
-- `scripts/verify-lab.js`: Database Tools-аар JSON/CSV import/export, BSON directory болон gzip archive backup, тусдаа restore database-ууд; тоо болон document-ийн бүх утгыг харьцуулна.
+Шинэ checkout дээр `npm install` ажиллуулж, `.env.example`-ээс `.env` үүсгэн бодит утгууд тохируулна. Байгаа `.env`-ийг дарж бичихгүй.
 
-Student success response нь `{ "success": true, "data": ... }`; жагсаалт нэмэлт `pagination`-тай. DELETE 200 болон message буцаана. Course/department API энэ үндсэн даалгаврын хүрээнд JSON хэвээр; тэдний хуучин өгөгдлийг MongoDB collection руу migration хийсэн. Нэмэлт Course/Teacher/Department Mongoose Schema/Model-уудыг мөн үүсгэж migration-ийн өмнөх validation/index бэлтгэлд ашигласан. Тэдний API controller-ийг MongoDB руу шилжүүлээгүй.
-
-## Migration ба импорт/экспорт
-
-```sh
-npm run migrate
-npm run migration:report
-npm run ids:clean
-npm run lab:verify
-npm test
+```dotenv
+PORT=3002
+JWT_SECRET=өөрийн-үүсгэсэн-урт-санамсаргүй-түлхүүр
+JWT_EXPIRES_IN=1h
+CORS_ORIGINS=http://localhost:3001
+MONGODB_HOST=127.0.0.1
+MONGODB_PORT=27017
+MONGODB_DATABASE=universityDb
+MONGODB_USERNAME=universityUser
+MONGODB_PASSWORD=өөрийн-нууц-үг
+MONGODB_AUTH_SOURCE=universityDb
 ```
 
-Эх өгөгдөл: students 0, courses 3, departments 0. teachers.json байхгүй байсан тул users.json-ийн teacher role-той 1 хэрэглэгчээс зөвхөн id/username/role-г авдаг; passwordHash MongoDB teachers рүү орохгүй. Course-ийн string id-уудыг Number болгож хувиргана. Legacy student-ийн ганц name байвал firstName-д хэвээр авч, дутуу lastName-г `—`, дутуу code-г `LEGACY{id}` болгодог; эдгээр өөрчлөлт тайланд орно.
+`JWT_SECRET` дор хаяж 32 тэмдэгттэй байна; `openssl rand -hex 32` ашиглаж үүсгэж болно. Энэ нь MongoDB нууц үг биш. `.env` дахь `JWT_EXPIRES_IN` нь token-ийн хугацаа; өөрчилсний дараа backend restart хийж дахин login хийнэ.
 
-Жишээ import: `data/import_students.json` 2 student (10,11), `data/students.csv` 3 student (20,21,22). Verification эдгээрийг импортлоод students 5 болно. Давтан ажиллахад ижил fixture-уудыг upsert хийнэ; өөр хүний ID-тай мөргөлдвөл дарж бичихгүй зогсоно. Импортын дараах migration report-ийн students зөрүү +5 нь эдгээр нэмэлт импортын мөрүүд юм. Swagger UI-аар POST/PUT шалгахад id=23, code=SWAGGER-LAB8-TEMP гэсэн нэмэлт жишээ бичлэг үүсгэсэн; үндсэн students одоо 6 бичлэгтэй.
+`config/db.js` нь дээрх MongoDB талбаруудаас URI байгуулж, нууц үгийн тусгай тэмдэгтүүдийг encode хийнэ. `MONGODB_URI` байвал түүнд давуу эрх өгнө; тусдаа талбаруудаар тохируулж байгаа үед хуучин authentication-гүй URI үлдээхгүй.
 
-Экспорт: `exports/backup_students.json`, `exports/students_public.json`, `exports/students_export.csv`. Numeric id, JSON array, CSV header болон Монгол кириллийг автоматаар шалгадаг. Backup нь backend-ээс гадна `../../mongo-backups/<timestamp>/` дотор байна. Restore нь эх database-ийг өөрчлөхгүй; test_restore нэр сул байвал түүнийг, үгүй бол timestamp-тай шинэ нэр ашиглана. Archive restore тусдаа `_archive` database руу орно. `--drop` ашиглахгүй.
+## MongoDB-д нэвтрэх
 
-Database Tools-ийг гараар ашиглах бол workspace root-д:
+Authentication идэвхтэй. Эдгээр нь сайтын admin/teacher/student данснаас тусдаа MongoDB хэрэглэгчид.
 
-```sh
-export PATH="$PWD/.local-tools/bin:$PATH"
-mongosh "mongodb://127.0.0.1:27017/university_course_management"
+| Хэрэглэгч | Эрх | Локал нууц үг |
+|---|---|---|
+| `universityUser` | Зөвхөн `universityDb` дээр `readWrite` | `.env` → `MONGODB_PASSWORD` |
+| `adminUser` | `admin` database дахь `root` | `.env.mongodb-admin` → `MONGODB_ADMIN_PASSWORD` |
+
+Backend зөвхөн `universityUser` ашиглана. Нууц файлууд Git-д орохгүй, шинэ clone-д автоматаар ирэхгүй. Шинэ MongoDB сервер дээр эдгээр хэрэглэгчийг админ эрхтэйгээр тусад нь үүсгэж authentication идэвхжүүлэх шаардлагатай.
+
+Энгийн Terminal дээр төслийн хэрэглэгчээр:
+
+```bash
+mongosh --host 127.0.0.1 --port 27017 --username universityUser --authenticationDatabase universityDb universityDb
 ```
 
-Shell дээр `show collections`, `db.students.countDocuments()`, `db.students.find().limit(5)` болон `db.students.aggregate([{ $project: { id: 1, idType: { $type: "$id" } } }])` шалгана. JSON-ийн `--jsonArray` нь array файлд шаардлагатай; CSV-д `--type=csv --headerline` хэрэглэнэ. Ажилласан командууд болон tool diagnostics нь `reports/lab8-verification.json` дотор хадгалагдана.
+Админаар:
 
-## API туршилт
+```bash
+mongosh --host 127.0.0.1 --port 27017 --username adminUser --authenticationDatabase admin
+```
 
-POST/PUT body:
+Нууц үгийг prompt дээр оруулна. Mongosh дотор:
+
+```javascript
+use universityDb
+show collections
+db.courses.findOne()
+db.students.countDocuments()
+```
+
+Командуудыг нэг нэгээр нь ажиллуулна. `mongosh ...` нь энгийн Terminal команд; `universityDb>` prompt дотор дахин бичихгүй. `show collections` нь олон тоогоор бичигдэнэ.
+
+Compass: Host `127.0.0.1`, Port `27017`, Authentication `Username/Password`, Username `universityUser`, Password `.env`-ээс, Authentication Database `universityDb`. Админ хэрэглэгчийн Authentication Database нь `admin`. Connection-ийн Name нь зөвхөн харагдах нэр; бодит порт General/URI дотор тохируулагдана.
+
+## API ба эрх
+
+`POST /api/auth/login` (мөн `/auth/login`) нь JWT буцаана. Нийтийн register 403; дансыг удирдлагын урсгалаар үүсгэнэ. Swagger-ийн Authorize талбарт token-ийг `Bearer` угтваргүй оруулна.
+
+| API | Хандах эрх |
+|---|---|
+| `/api/students` | GET: admin/teacher; POST: admin; PUT/PATCH: admin/teacher; DELETE: admin |
+| `/api/courses` | GET: нэвтэрсэн хэрэглэгч; POST/PUT/PATCH/DELETE: admin |
+| `/api/teachers`, `/api/departments`, `/api/rooms` | GET: нэвтэрсэн хэрэглэгч; бичих/устгах: admin |
+| `/api/course-selections` | Оюутны хүсэлт, админы батлах/татгалзах урсгал |
+| `/api/academic` | Profile, schedule, roster, багшийн дүн |
+| `/api/attendance` | Багшийн ирц |
+| `/api/planner` | Хэрэглэгчийн хувийн төлөвлөгөө |
+| `/api/assessments` | Багш, оюутны даалгавар/шалгалт |
+
+Student, Course, Teacher, Department API-д `/students`, `/courses`, `/teachers`, `/departments` alias бий. Student жагсаалт нь `{success,data,pagination}`; хайлт `search`, pagination `page`, `limit` (хамгийн их 100). Student numeric `id` болон MongoDB `_id` нь тусдаа.
+
+Student POST/PUT жишээ:
 
 ```json
 {"code":"ST2026099","firstName":"Номин","lastName":"Бат","email":"nomin99@example.com"}
 ```
 
-| Туршилт | Үр дүн |
-|---|---|
-| GET /api/students, GET /api/students/10 | 200 |
-| GET /api/students/abc | 400 |
-| GET /api/students/999999 | 404 |
-| POST /api/students (admin/teacher) | 201, сервер numeric id үүсгэнэ |
-| PUT /api/students/:id (admin/teacher) | 200 |
-| DELETE /api/students/:id (admin) | 200 |
-| Token байхгүй, хүчингүй эсвэл хугацаа дууссан | 401 |
-| Teacher DELETE, student Student API | 403 |
-| Хоосон/буруу body | 400 |
-| Давхардсан code/email | 409 |
+Validation/body/ID алдаа 400, token алдаа 401, эрх хүрэхгүй 403, олдохгүй 404, давхардсан unique талбар 409. CORS, request logger болон төвлөрсөн error handler ашиглана. `/api/demo-error` зориуд 500 буцаана. OpenAPI: `swagger/openapi.yaml`, JSON: `/api-docs/openapi.json`. Шинэ assessment API-ийн заавар дараагийн хэсэгт; Swagger бүх шинэ урсгалыг бүрэн жагсаасан гэж үзэхгүй.
 
-`npm test` бодит MongoDB дээр `lab8_api_test_*` тусдаа database үүсгэж, дуусахдаа зөвхөн тэр database-ийг цэвэрлэнэ. CRUD persistence, concurrent create, string id cleanup, JWT/role, CORS headers, Swagger, 404/500 шалгана. Main database болон JSON файлыг тест өөрчлөхгүй.
+## Даалгавар ба шалгалт
 
-## Compass болон screenshot
+Одоогийн хялбарчилсан горимд бүх багш бүх ажлыг, бүх оюутны хариуг харна. Бүх оюутан хичээл сонголтын төлөвөөс үл хамааран бүх ажилд хариу илгээнэ. Оюутан өөрийн хариу болон хариуны файлыг л харна. Нийтэлсэн материалын файл бүх багш/оюутанд харагдана.
 
-Compass-д `mongodb://127.0.0.1:27017` URI ашиглана. `university_course_management` дээр migration collection/document-уудаа харна. Давтан GUI импорт нь үндсэн students-ийн unique талбаруудтай мөргөлдөх тул GUI туршилтыг тусдаа collection дээр хийнэ. JSON/CSV import хийхдээ id-г Number болгоод, Export Data-аас JSON/CSV гаргаж header, кирилл болон document count-ийг CLI экспорттой харьцуулна.
+- `GET /api/assessments`: хичээлүүд, ажлууд, тухайн хэрэглэгчид харагдах хариунууд.
+- `POST /api/assessments`: багш нийтэлнэ; `courseId`, `kind` (`assignment`/`exam`), `title`, `description`, ирээдүйн `dueAt`, optional `attachment`.
+- `PUT /api/assessments/:id/submission`: оюутан `answer`, optional `attachment` илгээнэ. Хариу эсвэл файл шаардлагатай. Хугацаа дуусахаас өмнө өөрийн хариуг шинэчилж болно.
+- `GET /api/assessments/:id/file`: нийтэлсэн материал; `?submission=ID` нэмбэл хариуны файл.
 
-Албан ёсны суулгах заавар: [MongoDB macOS](https://www.mongodb.com/docs/v8.0/tutorial/install-mongodb-on-os-x/), [Database Tools](https://www.mongodb.com/docs/database-tools/installation/).
+`attachment` нь `{name,data}`; `data` Base64. Файл тус бүр 5 MB хүртэл. Assessment хүсэлтийн JSON limit 8 MB, бусад API 32 KB. Жагсаалтад файлын агуулга ирэхгүй; татах API-аар уншина. Шалгалт нь файл/текст хариу авах хэлбэртэй, автомат оноолт байхгүй. Frontend 5 секунд тутам шинэчлэгдэнэ.
 
-## Шалгалтын нотолгоо
+`node scripts/seed-assessments.js` нь багш бүрийн нэг хичээлд жишээ даалгавар/шалгалт, зааврын файл нэмнэ; давтан ажиллуулахад давхардуулахгүй.
 
-- `reports/api-test.log`: бодит MongoDB дээр 8 тест, 8 pass, 0 fail.
-- `reports/mongosh-check.txt`: ping, collection жагсаалт, импортын id-ийн `$type`.
-- `reports/lab8-verification.json`: ажилласан import/export/backup/restore командууд, count, document equality.
-- `reports/migration-report.json`: JSON ба MongoDB-ийн ялгаа. Импорт болон Swagger жишээ нь JSON source-д байхгүй тул нэмэлт ID гэж гарна.
-- Safari Swagger UI: admin login 200, Student GET 200, POST 201 (id 23), PUT 200 баталгаажсан. DELETE болон алдааны/role кейсүүдийг автомат API тестээр шалгасан.
+## Хичээл сонголт, хуваарь, дүн, ирц
 
-Postman ашиглах бол `postman/lab8.postman_collection.json`-ийг Import хийнэ. Base URL нь localhost:3002. Collection Runner-ийг дарааллаар ажиллуулахад demo role token-ууд авна, зөвхөн өөрийн үүсгэсэн test student-ийг CRUD хийнэ; response status assertion-уудтай. Token хугацаа дуусвал дахин login хийнэ. Collection-ийг Postman app дотор ажиллуулж шалгаагүй; API-ийн ижил кейсүүд автомат тестээр баталгаажсан.
+Хүсэлт `pending` → `approved`/`rejected`. Оюутны хуваарь зөвхөн баталгаажсан сонголтоос бүрдэнэ. Багш өөрийн хичээлийн баталгаажсан оюутанд дүн, ирц оруулна. Даалгавар/шалгалтын нээлттэй горим эдгээр эрхийг өөрчлөхгүй.
 
-Compass 1.53.2 нь workspace-ийн `../../.local-tools/compass/MongoDB Compass.app` дотор суусан бөгөөд localhost:27017-д холбогдсон. GUI дээр database жагсаалт харагдсаныг баталгаажуулсан. Гэхдээ UI automation нь collection нээх/импортлох оролдлогод `noWindowsAvailable` алдаа давтан өгсөн тул Compass GUI Import/Export болон түүний screenshot баталгаажаагүй. CLI import/export болон directory/archive restore нь бүрэн шалгагдсан; GUI алхмууд дээрх зааврын дагуу үлдсэн.
+Пар: `../shared/class-periods.json`; 1-р пар 08:40–10:10, 2-р пар 10:20–11:50, 3-р пар 12:00–13:30, 4-р пар 13:40–15:10, 5-р пар 15:20–16:50. `Course.sessions` нь day (0=Даваа ... 6=Ням), start, end, room, kind хадгална. Админ хуваарь тохируулж, сервер багш/өрөө/оюутны давхцлыг шалгана. Багшийн Grade болон оюутны хувийн Planner GPA нь тусдаа хадгалалттай.
 
-## Нэмэлт 7 даалгаврын баталгаажуулалт
+## Өгөгдөл, экспорт, migration
 
-Бүх нэмэлт даалгаврын хэрэгжилтийг шалгасан. `test/api.test.js` нь Course/Teacher/Department model-уудыг бодит MongoDB-д хадгалж, буруу болон давхардсан ID-г шалгана. Student API-ийн хайлтыг firstName (`болор`), lastName (`бат`), code (`concurrent0`) тус бүрээр шалгаж, page=1/limit=5 болон хоёр дахь хуудсанд давхардсан мөргүйг баталгаажуулдаг. Duplicate code/email 409, CSV string ID хувиргалт болон мөргөлдвөл урьдчилан зогсох шалгалтуудтай. Нийт 9 тест амжилттай.
+Collection-ууд: `students`, `teachers`, `rooms`, `departments`, `courses`, `users`, `courseselections`, `grades`, `attendances`, `planners`, `assessments`, `assessmentsubmissions`, `counters`.
 
-`npm run backup:verify` шинэ команд нь импорт/migration хийхгүйгээр одоогийн database-ийг archive+gzip backup авч, шинэ `test_restore_<timestamp>_<suffix>` database руу сэргээнэ. Эх database-ийг өөрчлөхгүй, --drop хэрэглэхгүй. Collection бүрийн document count болон бүх document-ийн утгыг харьцуулж `reports/backup-restore-report.json` гаргана. Иймээс өмнө импортолсон оюутнаа Swagger-аар зассан үед ч энэ командыг ашиглаж болно; `lab:verify`-ийн fixture импорт дахин ажиллахгүй.
+`data/` дахь үндсэн JSON snapshot: students 39, teachers 12, rooms 10, departments 2, courses 40 (2026-11-27-ны экспорт). Энэ нь runtime database-ийн цаашдын өөрчлөлтөөр автоматаар шинэчлэгдэхгүй.
 
-Ажиллуулах:
-
-```sh
-cd my-app/backend-lab8
-npm test
-npm run ids:clean
-npm run migration:report
-npm run backup:verify
+```bash
+node scripts/export-data.js
 ```
 
-2026-11-20-ны нэмэлт шалгалт: CSV cleanup converted=0/total=6 (одоогийн ID-ууд зөв Number); backup restore students 6→6, courses 3→3, teachers 1→1, departments 0→0, counters 1→1. Бүх document-ийн утга таарсан. Нотолгоо: `reports/additional-tasks.json`, `reports/additional-api-test.log`, `reports/migration-report.json`, `reports/backup-restore-report.json`.
+Өмнөх JSON-ийг түр хавтсанд нөөцлөөд таван үндсэн файлыг MongoDB-оос шинэчилнэ. `data/users.json` болон CSV/import fixture-уудыг энэ команд өөрчлөхгүй. JSON экспорт нь database-ийн бүрэн backup биш.
 
-Course/Teacher/Department Schema/Model бий болсон ч тэдний API controller-ууд JSON ашиглаж байгаа; Student CRUD нь MongoDB ашигладаг. teachers.json байхгүй үед migration report нь users.json-ийн teacher account-уудаас авсан эх үүсвэрийн тоог харуулдаг.
+Лабораторийн migration/import/backup helper-ууд `scripts/` дотор бий: `npm run migrate`, `npm run migration:report`, `npm run ids:clean`, `npm run lab:verify`, `npm run backup:verify`, `npm run departments:verify`. Import/seed/cleanup нь өгөгдөл өөрчилж болно. Backup/restore helper нь тусдаа database үүсгэх эрх шаарддаг; өдөр тутмын `universityUser` зөвхөн үндсэн database дээр эрхтэй тул эдгээрт админы/тусгай орчны холболт шаардлагатай. Хуучин тайлангийн database нэр, мөрийн тоо нь тухайн үеийн түүхэн үр дүн.
 
-## Department JSON импорт экспортын баталгаажуулалт
+## Тест
 
-2026-11-20-нд `data/departments.json` файлд id=1 Мэдээллийн технологи, id=2 Математик гэсэн 2 жишээ тэнхим нэмсэн. Өмнөх хоосон файлыг `reports/departments-before-import.json` дотор хадгалсан. Бодит `mongoimport` ажиллуулж MongoDB departments 0→2 болсон; `mongoexport`-оор `exports/departments_export.json` дотор 2 мөр гаргасан. JSON array, numeric id, мөрийн тоо, name болон Монгол кирилл утгууд таарч байгааг assertion-аар шалгасан.
+Database-гүй парын тест:
 
-Дахин шалгах команд: `npm run departments:verify`. Ижил ID-тай боловч өөр өгөгдөл байвал дарж бичихгүй зогсоно. Нотолгоо: `reports/departments-json-verification.json`. Одоогийн migration report-д departments JSON=2, MongoDB=2, зөрүү=0. Өмнөх backup тайлан дахь departments=0 нь тухайн backup авсан үеийн түүхэн тоо юм. Энэ үйлдэл зөвхөн backend-lab8-ийн JSON болон MongoDB-д хийгдсэн; өмнөх backend-ийн JSON API хэвээр.
+```bash
+node --test test/periods.test.js
+```
 
-## EDURA сургалтын орчин — 2026-11-26
+Одоогийн `.env` холболт дээр түр нэртэй collection үүсгээд цэвэрлэдэг assessment integration тест:
 
-Frontend нь http://localhost:3001/dashboard, API ба Swagger нь localhost:3002 дээр ажиллана. Хэрэглэгчид харагдах нэр EDURA болсон; хуучин нэвтрэлтийн хадгалалтын түлхүүрүүд нийцтэй хэвээр.
+```bash
+node --test test/assessments.test.js
+```
 
-- Оюутан: нүүр, курс/улирлаар санал болгох төлөвлөгөө, хичээл сонголтын хүсэлт, баталгаажсан хуваарь, багшийн дүн, хувийн голч тооцоолуур, багшийн танилцуулга.
-- Админ: сонголтын хүсэлт батлах/татгалзах, нэгдсэн хуваарь тохируулах, хичээл/оюутны бүртгэл, багшийн танилцуулга, тайлан.
-- Багш: зөвхөн өөрийн заадаг хичээлүүд, баталгаажсан сонголттой оюутнууд, дүн оруулах, ирц бүртгэх, багшийн танилцуулга. Хичээл сонголт болон миний хуваарь цэс байхгүй.
+Бүрэн suite:
 
-Хуваарь `Course.sessions` дотор day (0=Даваа ... 6=Ням), start, end, room, kind талбаруудаар хадгалагдана. Админы `/schedule` хэсэгт нэг хичээлд олон өдрийн лекц/лаборатори оруулж болно. Өөр өдрийн ижил цаг давхцал биш. Багш/өрөөний давхцал, бүртгэлтэй оюутны өөр хичээлийн давхцлыг сервер шалгана. Хуучин schedule текстийг дэмжсэн хөрвүүлэлттэй.
+```bash
+npm test
+```
 
-Хүсэлт pending → approved/rejected шилжинэ. Шийдвэрлэсэн хүсэлтийг дахин батлахад 409; баталгаажсан хичээлийг оюутан өөрөө цуцлахгүй. Оюутны хуваарь зөвхөн approved сонголт болон админы тогтоосон цагуудаас үүснэ. Багшид pending хүсэлт очихгүй. Нэг оюутны зэрэгцээ баталгаажуулалтыг энэ API процесс дотор дарааллуулдаг.
+`test/api.test.js` нь `MONGODB_TEST_URI` (өгөхгүй бол 27017) ашиглан `lab8_api_test_*` тусдаа database үүсгэнэ. Authentication асаалттай орчинд тэр database-ийг үүсгэх/цэвэрлэх эрхтэй тестийн холболт заавал тохируулна. Үндсэн database-ийн `readWrite` хэрэглэгч хангалтгүй. Credential-ийг командын түүх эсвэл Git-д оруулахгүй. Бүрэн suite-ийг authentication өөрчилснөөс хойш дахин тэнцсэн гэж баримтжуулаагүй.
 
-`/api/academic/grades` нь багшийн албан үнэлгээг тусдаа Grade collection-д хадгална. Зөвхөн тухайн хичээлийн багш, баталгаажсан оюутанд 0–100 оноо оруулна. Оюутан өөрийн дүнг харна. Хувийн GPA тооцоолуурын мэдээлэл Planner.grades-д тусдаа хадгалагдаж, PATCH хүсэлт зөвхөн өөрчилсөн бүлгээ шинэчилнэ. Өөр табын хуучин schedule/tasks нь дүнг дарж арилгахгүй.
-
-`node scripts/expand-curriculum.js` командаар 4 курс, 8 улирлын нийт 40 хичээл / 120 кредитийн сургалтын жишээ төлөвлөгөө бэлдсэн. Өмнө байсан 9 хичээлийг хадгалж, 31-ийг нэмсэн. Өөрчлөхөөс өмнөх Course/Teacher өгөгдөл reports/curriculum-before-*.json-д бий. Хөрөг зураг нь Random User-ийн жишээ зураг; сургуулийн бодит багшийн баталгаажсан зураг биш.
-
-Шалгалт: `npm test` 13/13 pass, үүнд зэрэгцээ баталгаажуулалт, хоёр өөр өдрийн ижил цаг, ижил өдрийн давхцал, дүнгийн хадгалалт, GPA-ийн бүлэгчилсэн PATCH, эрхийн хязгаарлалт багтсан. Frontend `npx tsc --noEmit` болон тусдаа build (`LAB_DIST_DIR=.next-portal-check npm run build`) амжилттай. Багшийн шинэ directory-ийн desktop харагдацыг Safari дээр шалгасан. Browser host тасалдсан тул бүх дүрийн browser үйлдлийг төгсгөл хүртэл автоматжуулж шалгаагүй; API тест болон HTTP шалгалт хийсэн.
-
-Оюутны өргөтгөл: `node scripts/expand-students.js` командаар өмнөх 6 бүртгэлийг хадгалж 34 жишээ оюутан нэмсэн, нийт 40. student1 нэвтрэх дансанд дутуу байсан Student profile нэмсэн. Бусад жишээ оюутны нэвтрэх данс эсвэл баталгаажсан сонголтыг автоматаар үүсгээгүй. Давтан ажиллуулахад 40-өөс давуулж нэмэхгүй. Нотолгоо: reports/student-expansion.json. Эх төлөв: reports/students-before-expansion-*.json.
-
-Compass-ийн хадгалсан URI дахь бодит портыг 27017-оос 27018 болгож Save & Connect хийсэн. Connected to 127.0.0.1:27018 болон university_course_management database GUI дээр харагдсаныг баталгаажуулсан.
-
-2026-11-26: Одоогийн 40 Student profile бүр нэвтрэх данстай болсон. Оюутны нэвтрэх нэр нь code, нууц үг нь хэрэглэгчийн хүсэлтээр `0000`. Багш болон админы нууц үгийг өөрчлөөгүй. Багшийн дүнгийн хуудас сонгосон хичээл/улирлыг хэрэглэгч тус бүрээр санаж, хадгалсан бүх дүнг тусдаа хүснэгтэд серверээс дахин уншиж харуулна. Улирлын урд/хойд зайг цэвэрлэж оноо хоосон харагдахаас сэргийлсэн.
-
-Сүүлийн нэвтрэлтийн тохиргоо: хэрэглэгчийн хүсэлтээр зөвхөн `student1` demo дансны хуучин `Student123!` нууц үгийг сэргээсэн. Кодтой бусад оюутны нууц үг `0000` хэвээр. student1 нь student role-оор оюутны бүх цэсийг ашиглана; бусад оюутны хувийн дүнг харахгүй.
-
-### Сонгосон хичээлийн 1–5-р парын хуваарь
-
-Хуваарь нь мөрөөр 1–5-р пар, баганаар Даваа–Ням харагдана. Цагийн нэг эх үүсвэр: `../shared/class-periods.json`: 1-р пар 08:40–10:10, 2-р пар 10:20–11:50, 3-р пар 12:00–13:30, 4-р пар 13:40–15:10, 5-р пар 15:20–16:50. Админ хуваарь засахдаа өдөр болон пар сонгоно; дараалсан эсвэл өөр өдрийн олон пар нэмж болно.
-
-Бүх каталогийн хичээлийг автоматаар хуваарьт байрлуулахгүй. Админы тохируулах жагсаалтад pending/approved сонголттой хичээлүүд л орно. Үндсэн хүснэгтэд approved оюутантай хичээлүүд, оюутны хувийн хуваарьт зөвхөн өөрийн approved сонголт харагдана. Сонгогдоогүй каталогийн хичээлийн жишээ цаг багш/өрөөг эзлэхгүй. Админ батлах үед бодит баталгаажсан хичээлийн багш, өрөө, оюутны цагийн давхцлыг шалгана.
-
-Бүх 40 хичээлд хийсэн түр автомат байршуулалтыг хэрэглэгчийн залруулгын дагуу бүрэн буцаасан; period-schedule-report.json нь applied=false. Зөвхөн одоогийн approved сонголттой 3 хичээлийн хуучин цагийг стандарт парын хилд ойртуулсан. Сонгогдоогүй 37 хичээл, дүн, хүсэлтийн төлөвийг өөрчлөөгүй. Нотолгоо: reports/selected-periods-report.json; өмнөх цагийн хуулбар: reports/selected-periods-before-*.json.
-
-Ирц бүртгэх хуудасны хичээл/огнооны талбарууд padding, шошго, тусдаа хүрээтэй болсон; зөвхөн баталгаажсан roster харагдана. Бүгд ирсэн товч, тэмдэглэсэн оюутны тоо, хадгалсан ирцийн дахин уншилттай. API болон парын шалгалт нийлээд 17/17 pass.
-
-MongoDB-ийн одоогийн үндсэн өгөгдлийг `data/students.json`, `teachers.json`, `rooms.json`, `departments.json`, `courses.json` руу шинэчлэх: `node scripts/export-data.js` (`backend-lab8` дотроос). Скрипт өмнөх JSON файлуудыг түр хавтсанд нөөцлөөд шинэчилнэ. Эдгээр нь экспортын snapshot тул цаашдын API өөрчлөлт автоматаар JSON руу бичигдэхгүй.
-
-## Одоогийн нэгдсэн локал MongoDB
-
-Холболт `mongodb://127.0.0.1:27017/universityDb`. Backend, mongosh болон Compass бүгд энэ порт, database-ийг ашиглана. `.env`-ийн `MONGODB_URI` энэ холболттой. MongoDB аль хэдийн ажиллаж байвал дахин сервер асаахгүй; `npm run db:start` ажиллаж байгааг шалгана. Хуучин 27018 сервер зогссон, өгөгдөл нь нөөцөөр хадгалагдсан.
-
-MongoDB authentication идэвхтэй. Backend `.env` дахь `universityUser`-ээр зөвхөн `universityDb` дээр `readWrite` эрхтэй холбогдоно; authentication-гүй `MONGODB_URI` ашиглахгүй. Админы credential `.env.mongodb-admin` файлд тусдаа хадгалагдаж Git-д орохгүй. Терминал: `mongosh --host 127.0.0.1 --port 27017 --username universityUser --authenticationDatabase universityDb universityDb` (нууц үгийг prompt дээр оруулна). Админд `--username adminUser --authenticationDatabase admin` ашиглана.
+Өмнөх migration, performance, backup тайлангууд `reports/` болон `../reports/` дотор хадгалагдсан; эдгээр нь одоогийн dataset-ийн шинэ баталгаа биш.
