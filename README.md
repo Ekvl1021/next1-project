@@ -13,7 +13,7 @@ Next.js frontend, Express API болон MongoDB ашигладаг сургал
 | Database | `universityDb` |
 
 MongoDB, API, frontend нь тусдаа процесс тул портууд нь өөр. Mongosh, Compass, backend гурав ижил MongoDB-ийн 27017 портод холбогдоно.
-push hiih
+
 ## Одоогийн компьютер дээр ажиллуулах
 
 MongoDB Homebrew service ашиглаж байгаа. Ажиллаж байвал дахин асаах шаардлагагүй.
