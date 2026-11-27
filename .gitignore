@@ -53,3 +53,6 @@ next-env.d.ts
 /frontend/build/
 
 !frontend/.env.local.example
+
+# Build output in any package
+**/dist/
