@@ -1,5 +1,7 @@
 .env
 node_modules/
+reports/
+exports/
+!.env.example
 
-# Per-user planner records
-data/planners.json
+.env.mongodb-admin

@@ -1,7 +1,0 @@
-.env
-node_modules/
-reports/
-exports/
-!.env.example
-
-.env.mongodb-admin

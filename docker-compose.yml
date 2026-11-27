@@ -1,0 +1,50 @@
+name: edura
+services:
+  mongodb:
+    image: mongo:8
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGODB_ADMIN_USERNAME:?Set admin username}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_ADMIN_PASSWORD:?Set admin password}
+      MONGO_INITDB_DATABASE: universityDb
+      APP_DB_USERNAME: ${MONGODB_USERNAME:?Set database username}
+      APP_DB_PASSWORD: ${MONGODB_PASSWORD:?Set database password}
+    volumes:
+      - mongo_data:/data/db
+      - ./docker/init-mongo.js:/docker-entrypoint-initdb.d/01-app-user.js:ro
+    healthcheck:
+      test:
+        - CMD
+        - mongosh
+        - --quiet
+        - --eval
+        - 'const app = db.getSiblingDB("universityDb"); if (!app.auth(process.env.APP_DB_USERNAME, process.env.APP_DB_PASSWORD)) quit(1); app.runCommand({ping: 1});'
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:5001:3002"
+    environment:
+      PORT: "3002"
+      JWT_SECRET: ${JWT_SECRET:?Set JWT secret}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-1h}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3001}
+      MONGODB_HOST: mongodb
+      MONGODB_PORT: "27017"
+      MONGODB_DATABASE: universityDb
+      MONGODB_USERNAME: ${MONGODB_USERNAME:?Set database username}
+      MONGODB_PASSWORD: ${MONGODB_PASSWORD:?Set database password}
+      MONGODB_AUTH_SOURCE: universityDb
+    depends_on:
+      mongodb:
+        condition: service_healthy
+
+volumes:
+  mongo_data:

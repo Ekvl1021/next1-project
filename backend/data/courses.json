@@ -1,23 +1,954 @@
 [
   {
-    "id": "1793345178649",
-    "title": "ego",
+    "id": 1795156403671,
+    "room": "A-301",
+    "schedule": "Даваа 2-р пар 10:20–11:50",
+    "teacher": "teacher1",
+    "title": "Веб систем ба технологи",
+    "category": "Мэргэжлийн суурь",
+    "code": "M.SW321",
+    "credits": 3,
+    "semester": 5,
+    "sessions": [
+      {
+        "day": 0,
+        "start": "10:20",
+        "end": "11:50",
+        "room": "A-301",
+        "kind": "Лекц"
+      }
+    ],
+    "updatedAt": "2026-11-26T15:45:24.960Z",
+    "year": 3
+  },
+  {
+    "id": 1795156404930,
+    "room": "B-204",
+    "schedule": "Даваа 1-р пар 08:40–10:10 · Лхагва 1-р пар 08:40–10:10",
+    "teacher": "Б. Энхтүвшин",
+    "title": "Өгөгдлийн сангийн систем",
+    "category": "Мэргэжлийн суурь",
+    "code": "M.SW212",
+    "credits": 3,
+    "semester": 3,
+    "sessions": [
+      {
+        "day": 0,
+        "start": "08:40",
+        "end": "10:10",
+        "room": "B-204",
+        "kind": "Лекц"
+      },
+      {
+        "day": 2,
+        "start": "08:40",
+        "end": "10:10",
+        "room": "B-204",
+        "kind": "Лекц"
+      }
+    ],
+    "updatedAt": "2026-11-26T15:45:24.960Z",
+    "year": 2
+  },
+  {
+    "id": 1795156404931,
+    "room": "A-205",
+    "schedule": "Мягмар 2-р пар 10:20–11:50 · Пүрэв 2-р пар 10:20–11:50",
+    "teacher": "Д. Мөнхзул",
+    "title": "Өгөгдлийн бүтэц ба алгоритм",
+    "category": "Мэргэжлийн суурь",
+    "code": "M.SW211",
+    "credits": 3,
+    "semester": 3,
+    "sessions": [
+      {
+        "day": 1,
+        "start": "10:20",
+        "end": "11:50",
+        "room": "A-205",
+        "kind": "Лекц"
+      },
+      {
+        "day": 3,
+        "start": "10:20",
+        "end": "11:50",
+        "room": "A-205",
+        "kind": "Лекц"
+      }
+    ],
+    "updatedAt": "2026-11-26T15:45:24.960Z",
+    "year": 2
+  },
+  {
+    "id": 1795156404932,
+    "room": "C-301",
+    "schedule": "Даваа, Баасан 13:00",
+    "teacher": "Ц. Тэмүүлэн",
+    "title": "Программ хангамжийн инженерчлэл",
+    "category": "Мэргэжлийн суурь",
+    "code": "M.CS218",
+    "credits": 3,
+    "semester": 4,
+    "sessions": [
+      {
+        "day": 0,
+        "start": "13:00",
+        "end": "14:30",
+        "room": "C-301",
+        "kind": "Лекц"
+      },
+      {
+        "day": 4,
+        "start": "13:00",
+        "end": "14:30",
+        "room": "C-301",
+        "kind": "Лекц"
+      }
+    ],
+    "updatedAt": "2026-11-26T15:43:01.784Z",
+    "year": 2
+  },
+  {
+    "id": 1795156404933,
+    "room": "B-110",
+    "schedule": "Мягмар, Пүрэв 14:00",
+    "teacher": "Н. Ариунболд",
+    "title": "Компьютерын сүлжээ",
+    "category": "Мэргэжлийн суурь",
+    "code": "M.SW217",
+    "credits": 3,
+    "semester": 4,
+    "sessions": [
+      {
+        "day": 1,
+        "start": "14:00",
+        "end": "15:30",
+        "room": "B-110",
+        "kind": "Лекц"
+      },
+      {
+        "day": 3,
+        "start": "14:00",
+        "end": "15:30",
+        "room": "B-110",
+        "kind": "Лекц"
+      }
+    ],
+    "updatedAt": "2026-11-26T15:43:01.784Z",
+    "year": 2
+  },
+  {
+    "id": 1795156404934,
+    "room": "A-102",
+    "schedule": "Лхагва, Баасан 09:00",
+    "teacher": "С. Оюунгэрэл",
+    "title": "Магадлал ба статистик",
+    "category": "Мэргэжлийн суурь",
+    "code": "M.SW214",
+    "credits": 3,
+    "semester": 3,
+    "sessions": [
+      {
+        "day": 2,
+        "start": "09:00",
+        "end": "10:30",
+        "room": "A-102",
+        "kind": "Лекц"
+      },
+      {
+        "day": 4,
+        "start": "09:00",
+        "end": "10:30",
+        "room": "A-102",
+        "kind": "Лекц"
+      }
+    ],
+    "updatedAt": "2026-11-26T15:43:01.784Z",
+    "year": 2
+  },
+  {
+    "id": 1795156404935,
+    "room": "C-205",
+    "schedule": "Даваа, Лхагва 15:00",
+    "teacher": "Г. Бат-Эрдэнэ",
+    "title": "Компьютерын архитектур",
+    "category": "Мэргэжлийн суурь",
+    "code": "M.CS213",
+    "credits": 3,
+    "semester": 3,
+    "sessions": [
+      {
+        "day": 0,
+        "start": "15:00",
+        "end": "16:30",
+        "room": "C-205",
+        "kind": "Лекц"
+      },
+      {
+        "day": 2,
+        "start": "15:00",
+        "end": "16:30",
+        "room": "C-205",
+        "kind": "Лекц"
+      }
+    ],
+    "updatedAt": "2026-11-26T15:43:01.784Z",
+    "year": 2
+  },
+  {
+    "id": 1795156404936,
+    "room": "A-301",
+    "schedule": "Мягмар, Пүрэв 11:00",
+    "teacher": "Э. Номин",
+    "title": "Хиймэл оюун ухааны үндэс",
+    "category": "Мэргэжлийн суурь",
+    "code": "M.CS328",
+    "credits": 3,
+    "semester": 6,
+    "sessions": [
+      {
+        "day": 1,
+        "start": "11:00",
+        "end": "12:30",
+        "room": "A-301",
+        "kind": "Лекц"
+      },
+      {
+        "day": 3,
+        "start": "11:00",
+        "end": "12:30",
+        "room": "A-301",
+        "kind": "Лекц"
+      }
+    ],
+    "updatedAt": "2026-11-26T15:43:01.784Z",
+    "year": 3
+  },
+  {
+    "id": 1795156404938,
+    "title": "Дискрет математик",
+    "teacher": "Буянтогтох",
+    "schedule": "Даваа 1-пар",
+    "room": "500",
+    "createdAt": "2026-11-25T16:31:15.995Z",
+    "updatedAt": "2026-11-26T15:43:01.784Z",
+    "category": "Ерөнхий суурь",
+    "code": "M.CS108",
+    "credits": 3,
+    "semester": 2,
+    "year": 1
+  },
+  {
+    "id": 1795156404939,
+    "code": "M.SW101",
+    "credits": 3,
+    "year": 1,
+    "semester": 1,
+    "category": "Ерөнхий суурь",
+    "sessions": [
+      {
+        "day": 0,
+        "start": "08:00",
+        "end": "09:30",
+        "room": "A-201",
+        "kind": "Лекц"
+      }
+    ],
+    "title": "Мэргэжлийн удиртгал",
+    "teacher": "teacher1",
+    "schedule": "Даваа 08:00–09:30",
+    "room": "A-201",
+    "createdAt": "2026-11-26T15:10:26.790Z",
+    "updatedAt": "2026-11-26T15:43:01.784Z"
+  },
+  {
+    "id": 1795156404940,
+    "code": "M.SW102",
+    "credits": 3,
+    "year": 1,
+    "semester": 1,
+    "category": "Ерөнхий суурь",
+    "sessions": [
+      {
+        "day": 1,
+        "start": "08:00",
+        "end": "09:30",
+        "room": "A-202",
+        "kind": "Лекц"
+      }
+    ],
+    "title": "Алгоритм, программчлалын үндэс",
+    "teacher": "teacher1",
+    "schedule": "Мягмар 08:00–09:30",
+    "room": "A-202",
+    "createdAt": "2026-11-26T15:10:26.796Z",
+    "updatedAt": "2026-11-26T15:43:01.784Z"
+  },
+  {
+    "id": 1795156404941,
+    "code": "M.CS103",
+    "credits": 3,
+    "year": 1,
+    "semester": 1,
+    "category": "Ерөнхий суурь",
+    "sessions": [
+      {
+        "day": 2,
+        "start": "08:00",
+        "end": "09:30",
+        "room": "A-203",
+        "kind": "Лекц"
+      }
+    ],
+    "title": "Дээд математик-1",
+    "teacher": "teacher1",
+    "schedule": "Лхагва 08:00–09:30",
+    "room": "A-203",
+    "createdAt": "2026-11-26T15:10:26.797Z",
+    "updatedAt": "2026-11-26T15:43:01.784Z"
+  },
+  {
+    "id": 1795156404942,
+    "code": "M.SW104",
+    "credits": 3,
+    "year": 1,
+    "semester": 1,
+    "category": "Ерөнхий суурь",
+    "sessions": [
+      {
+        "day": 3,
+        "start": "08:00",
+        "end": "09:30",
+        "room": "A-204",
+        "kind": "Лекц"
+      }
+    ],
+    "title": "Англи хэл-1",
+    "teacher": "teacher1",
+    "schedule": "Пүрэв 08:00–09:30",
+    "room": "A-204",
+    "createdAt": "2026-11-26T15:10:26.797Z",
+    "updatedAt": "2026-11-26T15:43:01.784Z"
+  },
+  {
+    "id": 1795156404943,
+    "code": "M.SW105",
+    "credits": 3,
+    "year": 1,
+    "semester": 1,
+    "category": "Ерөнхий суурь",
+    "sessions": [
+      {
+        "day": 4,
+        "start": "08:00",
+        "end": "09:30",
+        "room": "A-205",
+        "kind": "Лекц"
+      }
+    ],
+    "title": "Компьютер, тооцоолох системийн үндэс",
+    "teacher": "teacher1",
+    "schedule": "Баасан 08:00–09:30",
+    "room": "A-205",
+    "createdAt": "2026-11-26T15:10:26.798Z",
+    "updatedAt": "2026-11-26T15:43:01.784Z"
+  },
+  {
+    "id": 1795156404944,
+    "code": "M.SW106",
+    "credits": 3,
+    "year": 1,
+    "semester": 2,
+    "category": "Ерөнхий суурь",
+    "sessions": [
+      {
+        "day": 0,
+        "start": "09:40",
+        "end": "11:10",
+        "room": "A-201",
+        "kind": "Лекц"
+      }
+    ],
+    "title": "Объект хандалтат программчлал",
     "teacher": "rege",
-    "schedule": "fer",
-    "room": "ef"
+    "schedule": "Даваа 09:40–11:10",
+    "room": "A-201",
+    "createdAt": "2026-11-26T15:10:26.799Z",
+    "updatedAt": "2026-11-26T15:43:01.784Z"
   },
   {
-    "id": "1793345641730",
-    "title": "algoritm",
+    "id": 1795156404945,
+    "code": "M.SW107",
+    "credits": 3,
+    "year": 1,
+    "semester": 2,
+    "category": "Ерөнхий суурь",
+    "sessions": [
+      {
+        "day": 1,
+        "start": "09:40",
+        "end": "11:10",
+        "room": "A-202",
+        "kind": "Лекц"
+      }
+    ],
+    "title": "Дээд математик-2",
+    "teacher": "rege",
+    "schedule": "Мягмар 09:40–11:10",
+    "room": "A-202",
+    "createdAt": "2026-11-26T15:10:26.800Z",
+    "updatedAt": "2026-11-26T15:43:01.784Z"
+  },
+  {
+    "id": 1795156404946,
+    "code": "M.SW109",
+    "credits": 3,
+    "year": 1,
+    "semester": 2,
+    "category": "Ерөнхий суурь",
+    "sessions": [
+      {
+        "day": 3,
+        "start": "09:40",
+        "end": "11:10",
+        "room": "A-204",
+        "kind": "Лекц"
+      }
+    ],
+    "title": "Англи хэл-2",
+    "teacher": "rege",
+    "schedule": "Пүрэв 09:40–11:10",
+    "room": "A-204",
+    "createdAt": "2026-11-26T15:10:26.809Z",
+    "updatedAt": "2026-11-26T15:43:01.784Z"
+  },
+  {
+    "id": 1795156404947,
+    "code": "M.SW110",
+    "credits": 3,
+    "year": 1,
+    "semester": 2,
+    "category": "Ерөнхий суурь",
+    "sessions": [
+      {
+        "day": 4,
+        "start": "09:40",
+        "end": "11:10",
+        "room": "A-205",
+        "kind": "Лекц"
+      }
+    ],
+    "title": "Монгол хэл, найруулга зүй",
+    "teacher": "rege",
+    "schedule": "Баасан 09:40–11:10",
+    "room": "A-205",
+    "createdAt": "2026-11-26T15:10:26.809Z",
+    "updatedAt": "2026-11-26T15:43:01.784Z"
+  },
+  {
+    "id": 1795156404948,
+    "code": "M.SW215",
+    "credits": 3,
+    "year": 2,
+    "semester": 3,
+    "category": "Мэргэжлийн суурь",
+    "sessions": [
+      {
+        "day": 4,
+        "start": "11:20",
+        "end": "12:50",
+        "room": "A-205",
+        "kind": "Лекц"
+      }
+    ],
+    "title": "Мэргэжлийн англи хэл",
     "teacher": "Mijiddorj",
-    "schedule": "Davaa Lhagva",
-    "room": "A-205"
+    "schedule": "Баасан 11:20–12:50",
+    "room": "A-205",
+    "createdAt": "2026-11-26T15:10:26.813Z",
+    "updatedAt": "2026-11-26T15:43:01.784Z"
   },
   {
-    "id": "1793345661181",
-    "title": "web system",
+    "id": 1795156404949,
+    "code": "M.SW216",
+    "credits": 3,
+    "year": 2,
+    "semester": 4,
+    "category": "Мэргэжлийн суурь",
+    "sessions": [
+      {
+        "day": 0,
+        "start": "13:20",
+        "end": "14:50",
+        "room": "A-201",
+        "kind": "Лекц"
+      }
+    ],
+    "title": "Үйлдлийн систем",
     "teacher": "Ulambayar",
-    "schedule": "Baasan",
-    "room": "12-703"
+    "schedule": "Даваа 13:20–14:50",
+    "room": "A-201",
+    "createdAt": "2026-11-26T15:10:26.813Z",
+    "updatedAt": "2026-11-26T15:43:01.784Z"
+  },
+  {
+    "id": 1795156404950,
+    "code": "M.SW219",
+    "credits": 3,
+    "year": 2,
+    "semester": 4,
+    "category": "Мэргэжлийн суурь",
+    "sessions": [
+      {
+        "day": 3,
+        "start": "13:20",
+        "end": "14:50",
+        "room": "A-204",
+        "kind": "Лекц"
+      }
+    ],
+    "title": "Веб программчлалын үндэс",
+    "teacher": "Ulambayar",
+    "schedule": "Пүрэв 13:20–14:50",
+    "room": "A-204",
+    "createdAt": "2026-11-26T15:10:26.815Z",
+    "updatedAt": "2026-11-26T15:43:01.784Z"
+  },
+  {
+    "id": 1795156404951,
+    "code": "M.SW220",
+    "credits": 3,
+    "year": 2,
+    "semester": 4,
+    "category": "Мэргэжлийн суурь",
+    "sessions": [
+      {
+        "day": 4,
+        "start": "13:20",
+        "end": "14:50",
+        "room": "A-205",
+        "kind": "Лекц"
+      }
+    ],
+    "title": "Системийн шинжилгээ ба зохиомж",
+    "teacher": "Ulambayar",
+    "schedule": "Баасан 13:20–14:50",
+    "room": "A-205",
+    "createdAt": "2026-11-26T15:10:26.815Z",
+    "updatedAt": "2026-11-26T15:43:01.784Z"
+  },
+  {
+    "id": 1795156404952,
+    "code": "M.SW322",
+    "credits": 3,
+    "year": 3,
+    "semester": 5,
+    "category": "Мэргэжлийн суурь",
+    "sessions": [
+      {
+        "day": 1,
+        "start": "15:00",
+        "end": "16:30",
+        "room": "A-202",
+        "kind": "Лекц"
+      }
+    ],
+    "title": "Мобайл программчлал",
+    "teacher": "teacher1",
+    "schedule": "Мягмар 15:00–16:30",
+    "room": "A-202",
+    "createdAt": "2026-11-26T15:10:26.817Z",
+    "updatedAt": "2026-11-26T15:43:01.784Z"
+  },
+  {
+    "id": 1795156404953,
+    "code": "M.CS323",
+    "credits": 3,
+    "year": 3,
+    "semester": 5,
+    "category": "Мэргэжлийн суурь",
+    "sessions": [
+      {
+        "day": 2,
+        "start": "15:00",
+        "end": "16:30",
+        "room": "A-203",
+        "kind": "Лекц"
+      }
+    ],
+    "title": "Программ хангамжийн шаардлагын шинжилгээ",
+    "teacher": "teacher1",
+    "schedule": "Лхагва 15:00–16:30",
+    "room": "A-203",
+    "createdAt": "2026-11-26T15:10:26.817Z",
+    "updatedAt": "2026-11-26T15:43:01.784Z"
+  },
+  {
+    "id": 1795156404954,
+    "code": "M.SW324",
+    "credits": 3,
+    "year": 3,
+    "semester": 5,
+    "category": "Мэргэжлийн суурь",
+    "sessions": [
+      {
+        "day": 3,
+        "start": "15:00",
+        "end": "16:30",
+        "room": "A-204",
+        "kind": "Лекц"
+      }
+    ],
+    "title": "Хүн-компьютерын харилцаа",
+    "teacher": "teacher1",
+    "schedule": "Пүрэв 15:00–16:30",
+    "room": "A-204",
+    "createdAt": "2026-11-26T15:10:26.818Z",
+    "updatedAt": "2026-11-26T15:43:01.784Z"
+  },
+  {
+    "id": 1795156404955,
+    "code": "M.SW325",
+    "credits": 3,
+    "year": 3,
+    "semester": 5,
+    "category": "Мэргэжлийн суурь",
+    "sessions": [
+      {
+        "day": 4,
+        "start": "15:00",
+        "end": "16:30",
+        "room": "A-205",
+        "kind": "Лекц"
+      }
+    ],
+    "title": "Мэдээллийн аюулгүй байдал",
+    "teacher": "teacher1",
+    "schedule": "Баасан 15:00–16:30",
+    "room": "A-205",
+    "createdAt": "2026-11-26T15:10:26.819Z",
+    "updatedAt": "2026-11-26T15:43:01.784Z"
+  },
+  {
+    "id": 1795156404956,
+    "code": "M.SW326",
+    "credits": 3,
+    "year": 3,
+    "semester": 6,
+    "category": "Мэргэжлийн суурь",
+    "sessions": [
+      {
+        "day": 0,
+        "start": "16:40",
+        "end": "18:10",
+        "room": "A-201",
+        "kind": "Лекц"
+      }
+    ],
+    "title": "Программ хангамжийн тестлэл",
+    "teacher": "rege",
+    "schedule": "Даваа 16:40–18:10",
+    "room": "A-201",
+    "createdAt": "2026-11-26T15:10:26.819Z",
+    "updatedAt": "2026-11-26T15:43:01.784Z"
+  },
+  {
+    "id": 1795156404957,
+    "code": "M.SW327",
+    "credits": 3,
+    "year": 3,
+    "semester": 6,
+    "category": "Мэргэжлийн суурь",
+    "sessions": [
+      {
+        "day": 1,
+        "start": "16:40",
+        "end": "18:10",
+        "room": "A-202",
+        "kind": "Лекц"
+      }
+    ],
+    "title": "Тархмал систем",
+    "teacher": "rege",
+    "schedule": "Мягмар 16:40–18:10",
+    "room": "A-202",
+    "createdAt": "2026-11-26T15:10:26.819Z",
+    "updatedAt": "2026-11-26T15:43:01.784Z"
+  },
+  {
+    "id": 1795156404958,
+    "code": "M.SW329",
+    "credits": 3,
+    "year": 3,
+    "semester": 6,
+    "category": "Мэргэжлийн суурь",
+    "sessions": [
+      {
+        "day": 3,
+        "start": "16:40",
+        "end": "18:10",
+        "room": "A-204",
+        "kind": "Лекц"
+      }
+    ],
+    "title": "Программ хангамжийн архитектур",
+    "teacher": "rege",
+    "schedule": "Пүрэв 16:40–18:10",
+    "room": "A-204",
+    "createdAt": "2026-11-26T15:10:26.820Z",
+    "updatedAt": "2026-11-26T15:43:01.784Z"
+  },
+  {
+    "id": 1795156404959,
+    "code": "M.SW330",
+    "credits": 3,
+    "year": 3,
+    "semester": 6,
+    "category": "Мэргэжлийн суурь",
+    "sessions": [
+      {
+        "day": 4,
+        "start": "16:40",
+        "end": "18:10",
+        "room": "A-205",
+        "kind": "Лекц"
+      }
+    ],
+    "title": "Багийн төсөл",
+    "teacher": "rege",
+    "schedule": "Баасан 16:40–18:10",
+    "room": "A-205",
+    "createdAt": "2026-11-26T15:10:26.821Z",
+    "updatedAt": "2026-11-26T15:43:01.784Z"
+  },
+  {
+    "id": 1795156404960,
+    "code": "M.SW431",
+    "credits": 3,
+    "year": 4,
+    "semester": 7,
+    "category": "Мэргэшүүлэх",
+    "sessions": [
+      {
+        "day": 0,
+        "start": "08:00",
+        "end": "09:30",
+        "room": "B-201",
+        "kind": "Лекц"
+      }
+    ],
+    "title": "Үүлэн тооцоолол",
+    "teacher": "Mijiddorj",
+    "schedule": "Даваа 08:00–09:30",
+    "room": "B-201",
+    "createdAt": "2026-11-26T15:10:26.821Z",
+    "updatedAt": "2026-11-26T15:43:01.784Z"
+  },
+  {
+    "id": 1795156404961,
+    "code": "M.SW432",
+    "credits": 3,
+    "year": 4,
+    "semester": 7,
+    "category": "Мэргэшүүлэх",
+    "sessions": [
+      {
+        "day": 1,
+        "start": "08:00",
+        "end": "09:30",
+        "room": "B-202",
+        "kind": "Лекц"
+      }
+    ],
+    "title": "Машин сургалт",
+    "teacher": "Mijiddorj",
+    "schedule": "Мягмар 08:00–09:30",
+    "room": "B-202",
+    "createdAt": "2026-11-26T15:10:26.821Z",
+    "updatedAt": "2026-11-26T15:43:01.784Z"
+  },
+  {
+    "id": 1795156404962,
+    "code": "M.CS433",
+    "credits": 3,
+    "year": 4,
+    "semester": 7,
+    "category": "Мэргэшүүлэх",
+    "sessions": [
+      {
+        "day": 2,
+        "start": "08:00",
+        "end": "09:30",
+        "room": "B-203",
+        "kind": "Лекц"
+      }
+    ],
+    "title": "DevOps ба тасралтгүй хүргэлт",
+    "teacher": "Mijiddorj",
+    "schedule": "Лхагва 08:00–09:30",
+    "room": "B-203",
+    "createdAt": "2026-11-26T15:10:26.822Z",
+    "updatedAt": "2026-11-26T15:43:01.784Z"
+  },
+  {
+    "id": 1795156404963,
+    "code": "M.SW434",
+    "credits": 3,
+    "year": 4,
+    "semester": 7,
+    "category": "Мэргэшүүлэх",
+    "sessions": [
+      {
+        "day": 3,
+        "start": "08:00",
+        "end": "09:30",
+        "room": "B-204",
+        "kind": "Лекц"
+      }
+    ],
+    "title": "Үйлдвэрлэлийн дадлага",
+    "teacher": "Mijiddorj",
+    "schedule": "Пүрэв 08:00–09:30",
+    "room": "B-204",
+    "createdAt": "2026-11-26T15:10:26.822Z",
+    "updatedAt": "2026-11-26T15:43:01.784Z"
+  },
+  {
+    "id": 1795156404964,
+    "code": "M.SW435",
+    "credits": 3,
+    "year": 4,
+    "semester": 7,
+    "category": "Мэргэшүүлэх",
+    "sessions": [
+      {
+        "day": 4,
+        "start": "08:00",
+        "end": "09:30",
+        "room": "B-205",
+        "kind": "Лекц"
+      }
+    ],
+    "title": "Судалгааны арга зүй",
+    "teacher": "Mijiddorj",
+    "schedule": "Баасан 08:00–09:30",
+    "room": "B-205",
+    "createdAt": "2026-11-26T15:10:26.823Z",
+    "updatedAt": "2026-11-26T15:43:01.784Z"
+  },
+  {
+    "id": 1795156404965,
+    "code": "M.SW436",
+    "credits": 3,
+    "year": 4,
+    "semester": 8,
+    "category": "Мэргэшүүлэх",
+    "sessions": [
+      {
+        "day": 0,
+        "start": "09:40",
+        "end": "11:10",
+        "room": "B-201",
+        "kind": "Лекц"
+      }
+    ],
+    "title": "Төгсөлтийн төсөл",
+    "teacher": "Ulambayar",
+    "schedule": "Даваа 09:40–11:10",
+    "room": "B-201",
+    "createdAt": "2026-11-26T15:10:26.823Z",
+    "updatedAt": "2026-11-26T15:43:01.784Z"
+  },
+  {
+    "id": 1795156404966,
+    "code": "M.SW437",
+    "credits": 3,
+    "year": 4,
+    "semester": 8,
+    "category": "Мэргэшүүлэх",
+    "sessions": [
+      {
+        "day": 1,
+        "start": "09:40",
+        "end": "11:10",
+        "room": "B-202",
+        "kind": "Лекц"
+      }
+    ],
+    "title": "Өгөгдлийн шинжилгээ",
+    "teacher": "Ulambayar",
+    "schedule": "Мягмар 09:40–11:10",
+    "room": "B-202",
+    "createdAt": "2026-11-26T15:10:26.824Z",
+    "updatedAt": "2026-11-26T15:43:01.784Z"
+  },
+  {
+    "id": 1795156404967,
+    "code": "M.CS438",
+    "credits": 3,
+    "year": 4,
+    "semester": 8,
+    "category": "Мэргэшүүлэх",
+    "sessions": [
+      {
+        "day": 2,
+        "start": "09:40",
+        "end": "11:10",
+        "room": "B-203",
+        "kind": "Лекц"
+      }
+    ],
+    "title": "Программ хангамжийн төслийн менежмент",
+    "teacher": "Ulambayar",
+    "schedule": "Лхагва 09:40–11:10",
+    "room": "B-203",
+    "createdAt": "2026-11-26T15:10:26.824Z",
+    "updatedAt": "2026-11-26T15:43:01.784Z"
+  },
+  {
+    "id": 1795156404968,
+    "code": "M.SW439",
+    "credits": 3,
+    "year": 4,
+    "semester": 8,
+    "category": "Мэргэшүүлэх",
+    "sessions": [
+      {
+        "day": 3,
+        "start": "09:40",
+        "end": "11:10",
+        "room": "B-204",
+        "kind": "Лекц"
+      }
+    ],
+    "title": "Мэргэжлийн ёс зүй",
+    "teacher": "Ulambayar",
+    "schedule": "Пүрэв 09:40–11:10",
+    "room": "B-204",
+    "createdAt": "2026-11-26T15:10:26.824Z",
+    "updatedAt": "2026-11-26T15:43:01.784Z"
+  },
+  {
+    "id": 1795156404969,
+    "code": "M.SW440",
+    "credits": 3,
+    "year": 4,
+    "semester": 8,
+    "category": "Мэргэшүүлэх",
+    "sessions": [
+      {
+        "day": 4,
+        "start": "09:40",
+        "end": "11:10",
+        "room": "B-205",
+        "kind": "Лекц"
+      }
+    ],
+    "title": "Сонгон: IoT систем",
+    "teacher": "Ulambayar",
+    "schedule": "Баасан 09:40–11:10",
+    "room": "B-205",
+    "createdAt": "2026-11-26T15:10:26.825Z",
+    "updatedAt": "2026-11-26T15:43:01.784Z"
   }
 ]

@@ -45,3 +45,11 @@ next-env.d.ts
 
 # Isolated portal verification build
 /.next-portal-check/
+
+# Nested frontend/backend structure
+**/node_modules/
+/frontend/.next*/
+/frontend/out/
+/frontend/build/
+
+!frontend/.env.local.example
