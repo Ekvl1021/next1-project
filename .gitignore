@@ -45,3 +45,17 @@ next-env.d.ts
 
 # Isolated portal verification build
 /.next-portal-check/
+<<<<<<< Updated upstream
+=======
+
+# Nested frontend/backend structure
+**/node_modules/
+/frontend/.next*/
+/frontend/out/
+/frontend/build/
+
+!frontend/.env.local.example
+
+# Build output in any package
+**/dist/
+>>>>>>> Stashed changes
